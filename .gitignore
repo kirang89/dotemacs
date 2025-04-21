@@ -6,6 +6,7 @@ transient
 tree-sitter
 projectile-bookmarks.eld
 recentf
+codeium
 
 .cache
 .lsp-session-*

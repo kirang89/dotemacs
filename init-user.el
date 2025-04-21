@@ -603,34 +603,89 @@
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
+(use-package minuet
+  :init
+  (add-hook 'prog-mode-hook #'minuet-auto-suggestion-mode)
+  :config
+  (setq minuet-provider 'openai-fim-compatible)
+  (setq minuet-n-completions 1) ; recommended for Local LLM for resource saving
+  (setq minuet-context-window 512)
+  (plist-put minuet-openai-fim-compatible-options :end-point "http://localhost:11434/v1/completions")
+  (plist-put minuet-openai-fim-compatible-options :name "Ollama")
+  (plist-put minuet-openai-fim-compatible-options :api-key "TERM")
+  (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:3b")
+  ;; Use this when running llm with llama.cpp
+  ;;
+  ;; llama-server \
+  ;;   -hf ggml-org/Qwen2.5-Coder-1.5B-Q8_0-GGUF \
+  ;;   --port 8012 -ngl 99 -fa -ub 1024 -b 1024 \
+  ;;   --ctx-size 0 --cache-reuse 256
+  ;;
+  ;; (plist-put minuet-openai-fim-compatible-options :end-point "http://localhost:8012/v1/completions")
+  ;; (plist-put minuet-openai-fim-compatible-options :name "Llama.cpp")
+  ;; (plist-put minuet-openai-fim-compatible-options :api-key "TERM")
+  ;; (plist-put minuet-openai-fim-compatible-options :model "PLACEHOLDER")
+  (minuet-set-optional-options minuet-openai-fim-compatible-options :suffix nil :template)
+  (minuet-set-optional-options
+   minuet-openai-fim-compatible-options
+   :prompt
+   (defun minuet-llama-cpp-fim-qwen-prompt-function (ctx)
+     (format "<|fim_prefix|>%s\n%s<|fim_suffix|>%s<|fim_middle|>"
+             (plist-get ctx :language-and-tab)
+             (plist-get ctx :before-cursor)
+             (plist-get ctx :after-cursor)))
+   :template)
 
-;; (use-package corfu
-;;   :custom
-;;   (corfu-cycle t)
-;;   (corfu-auto t)
-;;   (corfu-quit-no-match 'separator)
+  (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 64))
+
+;; TODO: This needs an auth key to use
+;; (use-package codeium
+;;   :straight '(:type git :host github :repo "Exafunction/codeium.el")
 ;;   :init
-;;   (global-corfu-mode)
+;;   (add-to-list 'completion-at-point-functions #'codeium-completion-at-point)
+;;   (add-hook 'python-mode-hook
+;;             (lambda ()
+;;               (setq-local completion-at-point-functions '(codeium-completion-at-point))))
+;;   ;; codeium-completion-at-point is autoloaded, but you can
+;;   ;; optionally set a timer, which might speed up things as the
+;;   ;; codeium local language server takes ~0.2s to start up
+;;   (add-hook 'emacs-startup-hook
+;;             (lambda () (run-with-timer 0.1 nil #'codeium-init)))
 ;;   :config
-;;   (use-package nerd-icons-corfu
-;;     :config
-;;     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
+;;   (setq use-dialog-box nil) ;; do not use popup boxes
 
-;; (use-package aider
-;;   :straight (:host github :repo "tninja/aider.el" :files ("aider.el"))
-;;   :config
-;;   ;; Use claude-3-5-sonnet cause it is best in aider benchmark
-;;   (setq aider-args '("--model" "anthropic/claude-3-5-sonnet-20241022"))
-;;   ;; (setenv "ANTHROPIC_API_KEY" anthropic-api-key)
-;;   ;; Or use chatgpt model since it is most well known
-;;   ;; (setq aider-args '("--model" "gpt-4o-mini"))
-;;   ;; (setenv "OPENAI_API_KEY" <your-openai-api-key>)
-;;   ;; Or use gemini v2 model since it is very good and free
-;;   ;; (setq aider-args '("--model" "gemini/gemini-exp-1206"))
-;;   ;; (setenv "GEMINI_API_KEY" <your-gemini-api-key>)
-;;   ;; ;;
-;;   ;;Optional: Set a key binding for the transient menu
-;;   (global-set-key (kbd "C-c a") 'aider-transient-menu))
+;;   ;; if you don't want to use customize to save the api-key
+;;   ;; (setq codeium/metadata/api_key "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+
+;;   ;; get codeium status in the modeline
+;;   (setq codeium-mode-line-enable
+;;         (lambda (api) (not (memq api '(CancelRequest Heartbeat AcceptCompletion)))))
+;;   (add-to-list 'mode-line-format '(:eval (car-safe codeium-mode-line)) t)
+;;   ;; use M-x codeium-diagnose to see apis/fields that would be sent to the local language server
+;;   (setq codeium-api-enabled
+;;         (lambda (api)
+;;           (memq api '(GetCompletions Heartbeat CancelRequest GetAuthToken RegisterUser auth-redirect AcceptCompletion))))
+
+;;   ;; limit string sent to codeium for better performance
+;;   (defun my-codeium/document/text ()
+;;     (buffer-substring-no-properties (max (- (point) 3000) (point-min)) (min (+ (point) 1000) (point-max))))
+
+;;   ;; if you change the text, you should also change the cursor_offset
+;;   ;; warning: this is measured by UTF-8 encoded bytes
+;;   (defun my-codeium/document/cursor_offset ()
+;;     (codeium-utf8-byte-length
+;;      (buffer-substring-no-properties (max (- (point) 3000) (point-min)) (point))))
+;;   (setq codeium/document/text 'my-codeium/document/text)
+;;   (setq codeium/document/cursor_offset 'my-codeium/document/cursor_offset))
+
+(use-package aidermacs
+  :bind (("C-c a" . aidermacs-transient-menu))
+  :config
+  ;;(setenv "OPENROUTER_API_KEY" (my-get-openrouter-api-key))
+  :custom
+  (aidermacs-use-architect-mode t)
+  (aidermacs-default-model "qwen2.5-coder:1.5b")
+  (aidermacs-architect-model "deepcoder:latest"))
 
 ;; (use-package gptel
 ;;   :config
