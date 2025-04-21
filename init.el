@@ -202,26 +202,62 @@
   :init
   (savehist-mode))
 
-;; Install and setup company-mode for autocompletion
-(use-package company
-  :bind (("C-p" . company-select-previous)
-         ("C-n" . company-select-next))
-  :init
-  (add-hook 'prog-mode-hook 'company-mode)
+(use-package nerd-icons-corfu)
+
+(use-package corfu
+  :straight (corfu :repo "minad/corfu" :branch "main" :files (:defaults "extensions/*.el"))
+  :demand t
   :config
-  (global-company-mode)
-  (setq company-tooltip-limit 10)
-  (setq company-idle-delay 0.2)
-  (setq company-echo-delay 0)
-  (setq company-minimum-prefix-length 2)
-  (setq company-require-match nil)
-  (setq company-selection-wrap-around t)
-  (setq company-tooltip-align-annotations t)
-  (setq company-tooltip-flip-when-above nil)
-  (setq company-dabbrev-ignore-case nil
-        company-dabbrev-downcase nil)
-  ;; weight by frequency
-  (setq company-transformers '(company-sort-by-occurrence)))
+  (defun corfu-complete-and-quit ()
+    (interactive)
+    (corfu-complete)
+    (corfu-quit))
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+  (global-corfu-mode 1)
+  (corfu-popupinfo-mode +1)
+  :bind  (:map corfu-map
+               ("TAB" . corfu-next)
+               ([tab] . corfu-next)
+               ("RET" . corfu-complete-and-quit)
+               ("<return>" . corfu-complete-and-quit)
+               ([remap completion-at-point] . corfu-complete))
+  :custom
+  (corfu-auto t)
+  (corfu-cycle nil)
+  (corfu-count 9)
+  (corfu-on-exact-match 'quit)
+  (corfu-preselect-first t)
+  (corfu-quit-at-boundary 'separator)
+  (corfu-auto-delay 0.0)
+  (corfu-auto-prefix 2)
+  (corfu-quit-no-match t)
+  (corfu-scroll-margin 5))
+
+(use-package cape
+  :demand t
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-file))
+
+;; Install and setup company-mode for autocompletion
+;; (use-package company
+;;   :bind (("C-p" . company-select-previous)
+;;          ("C-n" . company-select-next))
+;;   :init
+;;   (add-hook 'prog-mode-hook 'company-mode)
+;;   :config
+;;   (global-company-mode)
+;;   (setq company-tooltip-limit 10)
+;;   (setq company-idle-delay 0.2)
+;;   (setq company-echo-delay 0)
+;;   (setq company-minimum-prefix-length 2)
+;;   (setq company-require-match nil)
+;;   (setq company-selection-wrap-around t)
+;;   (setq company-tooltip-align-annotations t)
+;;   (setq company-tooltip-flip-when-above nil)
+;;   (setq company-dabbrev-ignore-case nil
+;;         company-dabbrev-downcase nil)
+;;   ;; weight by frequency
+;;   (setq company-transformers '(company-sort-by-occurrence)))
 
 ;; Better syntax highlighting
 ;;(use-package clojure-mode-extra-font-locking)
