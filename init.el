@@ -188,14 +188,13 @@
          ("M-g g" . consult-goto-line)
          ("M-g o" . consult-outline)
          ("M-g l" . consult-line)
-         ("M-g f" . consult-find))
+         ("M-g f" . consult-find)
+         ("s-l"   . consult-line)
+         ("C-x 4 b" . consult-buffer-other-window))
 
   :config
   (setq consult-find-args "find . -not ( -path */.[A-Za-z]* -prune )")
 
-  ;; (use-package consult-selectrum
-  ;; :after selectrum
-  ;; :demand t)
   )
 
 ;; Persist history over Emacs restarts. Vertico sorts by history position.

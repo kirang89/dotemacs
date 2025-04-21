@@ -78,8 +78,8 @@
                (set-visited-file-name new-name)
                (set-buffer-modified-p nil)
                (message "File '%s' successfully renamed to '%s'"
-			name
-			(file-name-nondirectory new-name))))))))
+			                  name
+			                  (file-name-nondirectory new-name))))))))
 
 (defun kg/delete-this-buffer-and-file ()
   "Remove file connected to current buffer and kill buffer."
@@ -116,16 +116,16 @@
       (delete-other-windows))))
 
 (defun kg/isearch-query-replace-symbol-at-point ()
-    "Run `query-replace-regexp' for the symbol at point."
-    (interactive)
-    (isearch-forward-symbol-at-point)
-    (isearch-query-replace-regexp))
+  "Run `query-replace-regexp' for the symbol at point."
+  (interactive)
+  (isearch-forward-symbol-at-point)
+  (isearch-query-replace-regexp))
 
 (defun kg/create-tags (dir-name)
-    "Create tags file."
-    (interactive "Directory: ")
-    (shell-command
-     (format "%s -f TAGS -e -R %s" ctags-path (directory-file-name dir-name))))
+  "Create tags file."
+  (interactive "Directory: ")
+  (shell-command
+   (format "%s -f TAGS -e -R %s" ctags-path (directory-file-name dir-name))))
 
 ;; taken from https://github.com/howardabrams/dot-files/blob/master/emacs.org#unfill-paragraph
 (defun kg/unfill-paragraph ()
@@ -161,5 +161,17 @@
     (abort-recursive-edit))
    (t
     (keyboard-quit))))
+
+(defun kg/xref-find-definitions (symbol)
+  "Find the definition of SYMBOL, trying eglot first, then falling back to ripgrep."
+  (interactive (list (xref-read-identifier 'find-definitions)))
+  (let (found-definition)
+    (condition-case nil
+        (progn
+          (call-interactively #'eglot-find-definitions)
+          (setq found-definition t))
+      (error (message "Eglot did not find a definition for '%s'" symbol)))
+    (unless found-definition
+      (consult-ripgrep symbol))))
 
 (provide 'init-efuns)

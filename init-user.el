@@ -54,17 +54,18 @@
 (delete-selection-mode 1)
 
 (use-package spacious-padding
+  :straight (spacious-padding :type git :host github :repo "protesilaos/spacious-padding")
+  :demand t
   :hook (after-init . spacious-padding-mode)
-  :config
-  ;; (setq spacious-padding-widths
-  ;;     '(:internal-border-width 15
-  ;;        ;; :header-line-width 4
-  ;;        ;; :mode-line-width 6
-  ;;        ;; :tab-width 4
-  ;;        ;; :right-divider-width 30
-  ;;        ;; :scroll-bar-width 8
-  ;;        :fringe-width 8))
-  )
+  :custom
+  (spacious-padding-widths
+   '( :internal-border-width 24
+      :header-line-width 4
+      :mode-line-width 10
+      :tab-width 4
+      :right-divider-width 30
+      :scroll-bar-width 12
+      :fringe-width 12)))
 
 ;; =========================================================
 ;;                          THEMES
@@ -300,6 +301,20 @@
   :config
   (ultra-scroll-mode 1))
 
+(use-package benchmark-init
+  :ensure t
+  :config
+  ;; To disable collection of benchmark data after init is done.
+  (add-hook 'after-init-hook 'benchmark-init/deactivate))
+
+(use-package csv-mode
+  :straight t
+  :mode "\\.csv\\'"
+  :hook
+  (csv-mode . csv-align-mode)
+  :bind
+  ("C-c C-h" . csv-header-line))
+
 ;; (use-package popper
 ;;   :straight t
 ;;   :bind (("C-`"   . popper-toggle)
@@ -321,7 +336,10 @@
 (use-package xref
   :straight (:type built-in)
   :custom
-  (xref-search-program 'ripgrep))
+  (xref-search-program 'ripgrep)
+  :config
+  ;; (defalias 'xref-find-definitions 'kg/xref-find-definitions)
+  )
 
 (use-package apheleia
   :straight t
@@ -430,7 +448,6 @@
  '(eshell project-eshell overwrite-mode iconify-frame diary))
 
 (setq ns-use-proxy-icon nil)
-(setq frame-title-format nil)
 
 ;; Omit magit from native compilation
 ;; (setq native-comp-deferred-compilation-deny-list '("magit"))
@@ -685,8 +702,9 @@
 ;;                      GLOBAL KEYBINDINGS
 ;; =========================================================
 
+;; (global-set-key (kbd "s-p") 'projectile-switch-project)
 (global-set-key (kbd "s-g") 'kg/search-marked-region-if-available)
-(global-set-key (kbd "s-l") 'goto-line)
+(global-set-key (kbd "s-l") 'consult-line)
 (global-set-key (kbd "s-t") 'projectile-find-file)
 (global-set-key (kbd "M-j") (lambda () (interactive) (join-line -1)))
 (global-set-key (kbd "s-{") 'previous-buffer)
