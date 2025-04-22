@@ -5,6 +5,7 @@
 (setq gc-cons-threshold 50000000
       gc-cons-percentage 0.6)
 
+(setq frame-inhibit-implied-resize t)
 
 ;; Automatically reload files when they change on disk
 (global-auto-revert-mode 1)

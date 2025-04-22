@@ -46,22 +46,6 @@
     (setq deactivate-mark nil)
     (exchange-point-and-mark)))
 
-(defun kg/set-fringe-background ()
-  "Set the fringe background to the same color as the regular background."
-  (interactive)
-  (custom-set-faces
-   `(fringe ((t (:background ,(face-background 'default)))))))
-
-(add-hook 'after-init-hook #'kg/set-fringe-background)
-
-(defun kg/reset-ui ()
-  "Reset some UI components after changing a theme."
-  (interactive)
-  ;; (fringe-mode 10)
-  (fringe-mode '(0 . 0))
-  (kg/set-fringe-background)
-  (setq linum-format "%5d "))
-
 (defun kg/rename-this-buffer-and-file ()
   "Rename current buffer and file it is visiting."
   (interactive)

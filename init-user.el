@@ -71,6 +71,10 @@
 ;;                          THEMES
 ;; =========================================================
 
+(defadvice load-theme (before disable-themes-first activate)
+  "Disable all active themes before loading a new theme."
+  (dolist (theme custom-enabled-themes)
+    (disable-theme theme)))
 
 (use-package catppuccin-theme
   :straight `(catppuccin-theme :type git
@@ -80,17 +84,6 @@
   :config
   (load-theme 'catppuccin t)
   (setq catppuccin-flavor 'frappe))
-
-;; Run hooks after loading a new theme
-(defvar after-load-theme-hook nil
-  "Hook run after a color theme is loaded using `load-theme'.")
-
-(defun run-after-load-theme-hook (&rest _)
-  "Run `after-load-theme-hook'."
-  (run-hooks 'after-load-theme-hook))
-
-(advice-add #'load-theme :after #'run-after-load-theme-hook)
-(add-hook 'after-load-theme-hook #'kg/reset-ui)
 
 ;; =========================================================
 ;;                OTHER THIRD PARTY PACKAGES
