@@ -791,7 +791,7 @@ cleared, make sure the overlay doesn't come back too soon."
 (global-set-key (kbd "<f6>") 'kg/show-user-config)
 (global-set-key (kbd "s-w") 'kill-current-buffer)
 (global-set-key (kbd "<s-S-return>") 'kg/toggle-maximize-buffer)
-
+(global-set-key (kbd "M-.") 'kg/find-definition)
 
 ;; =============== ADD THEME FOLDER =========================
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")

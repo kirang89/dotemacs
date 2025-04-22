@@ -146,16 +146,33 @@
    (t
     (keyboard-quit))))
 
-(defun kg/xref-find-definitions (symbol)
-  "Find the definition of SYMBOL, trying eglot first, then falling back to ripgrep."
-  (interactive (list (xref-read-identifier 'find-definitions)))
-  (let (found-definition)
-    (condition-case nil
-        (progn
-          (call-interactively #'eglot-find-definitions)
-          (setq found-definition t))
-      (error (message "Eglot did not find a definition for '%s'" symbol)))
-    (unless found-definition
-      (consult-ripgrep symbol))))
+(defun kg/rg-find-definitions ()
+  "Find definition using ripgrep and display results in minibuffer."
+  (interactive)
+  (let* ((symbol (thing-at-point 'symbol t))
+         (default-directory (or (and (fboundp 'projectile-project-root)
+                                     (projectile-project-root))
+                                default-directory)))
+    (if (fboundp 'consult-ripgrep)
+        (consult-ripgrep default-directory (format "\\b%s\\b" symbol))
+      (rg-run symbol "everything" default-directory nil nil 'interactive))))
+
+(defun kg/find-definition ()
+  "Find definition with precedence: LSP/eglot > ripgrep."
+  (interactive)
+  (let ((xref-used nil))
+    (cond
+     ;; Use xref only if eglot/lsp is active
+     ((and (boundp 'eglot--managed-mode) eglot--managed-mode)
+      (setq xref-used t)
+      (call-interactively 'xref-find-definitions))
+
+     ((and (fboundp 'lsp-mode) (bound-and-true-p lsp-mode))
+      (setq xref-used t)
+      (call-interactively 'xref-find-definitions)))
+
+    ;; Fallback to ripgrep
+    (unless xref-used
+      (kg/rg-find-definitions))))
 
 (provide 'init-efuns)
