@@ -109,17 +109,6 @@
     :confirm prefix
     :flags ("--hidden -g !.git")))
 
-(use-package counsel
-  :after rg
-  :config
-  (global-set-key (kbd "s-r") 'counsel-recentf)
-  (setq counsel-rg-base-command "rg -i -M 120 --no-heading --line-number --color never %s .")
-  (setq recentf-max-saved-items 50)
-  (setq recentf-auto-cleanup (* 24 60 60))
-  (use-package flx
-    :init
-    (setq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))))
-
 (use-package swiper)
 
 (use-package multiple-cursors
@@ -746,29 +735,29 @@
                               shell-script-modes)
   "Modes in which copilot is inconvenient.")
 
-(defun kg/copilot-disable-predicate ()
-  "When copilot should not automatically show completions."
-  (or (member major-mode kg/no-copilot-modes)))
+;; (defun kg/copilot-disable-predicate ()
+;;   "When copilot should not automatically show completions."
+;;   (or (member major-mode kg/no-copilot-modes)))
 
-(add-to-list 'copilot-disable-predicates #'kg/copilot-disable-predicate)
+;; (add-to-list 'copilot-disable-predicates #'kg/copilot-disable-predicate)
 
-(defun kg/copilot-quit ()
-  "Run `copilot-clear-overlay' or `keyboard-quit'. If copilot is
-cleared, make sure the overlay doesn't come back too soon."
-  (interactive)
-  (condition-case err
-      (when copilot--overlay
-        (lexical-let ((pre-copilot-disable-predicates copilot-disable-predicates))
-                     (setq copilot-disable-predicates (list (lambda () t)))
-                     (copilot-clear-overlay)
-                     (run-with-idle-timer
-                      1.0
-                      nil
-                      (lambda ()
-                        (setq copilot-disable-predicates pre-copilot-disable-predicates)))))
-    (error handler)))
+;; (defun kg/copilot-quit ()
+;;   "Run `copilot-clear-overlay' or `keyboard-quit'. If copilot is
+;; cleared, make sure the overlay doesn't come back too soon."
+;;   (interactive)
+;;   (condition-case err
+;;       (when copilot--overlay
+;;         (lexical-let ((pre-copilot-disable-predicates copilot-disable-predicates))
+;;                      (setq copilot-disable-predicates (list (lambda () t)))
+;;                      (copilot-clear-overlay)
+;;                      (run-with-idle-timer
+;;                       1.0
+;;                       nil
+;;                       (lambda ()
+;;                         (setq copilot-disable-predicates pre-copilot-disable-predicates)))))
+;;     (error handler)))
 
-(advice-add 'keyboard-quit :before #'kg/copilot-quit)
+;; (advice-add 'keyboard-quit :before #'kg/copilot-quit)
 
 ;; Load custom functions
 (load "/Users/kiran/.emacs.d/init-efuns.el")
@@ -778,7 +767,8 @@ cleared, make sure the overlay doesn't come back too soon."
 ;; =========================================================
 
 (global-set-key (kbd "s-g") 'kg/search-marked-region-if-available)
-(global-set-key (kbd "s-l") 'consult-line)
+(global-set-key (kbd "s-l") 'consult-goto-line)
+(global-set-key (kbd "s-f") 'consult-line)
 (global-set-key (kbd "s-t") 'projectile-find-file)
 (global-set-key (kbd "M-j") (lambda () (interactive) (join-line -1)))
 (global-set-key (kbd "s-{") 'previous-buffer)
@@ -792,6 +782,7 @@ cleared, make sure the overlay doesn't come back too soon."
 (global-set-key (kbd "s-w") 'kill-current-buffer)
 (global-set-key (kbd "<s-S-return>") 'kg/toggle-maximize-buffer)
 (global-set-key (kbd "M-.") 'kg/find-definition)
+(global-set-key (kbd "s-r") 'consult-recent-file)
 
 ;; =============== ADD THEME FOLDER =========================
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
