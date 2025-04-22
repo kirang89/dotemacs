@@ -248,16 +248,47 @@
 ;;          ("C-c i r" . 'inf-elixir-send-region)
 ;;          ("C-c i b" . 'inf-elixir-send-buffer)))
 
-;; (use-package flycheck
-;;   :after elixir-mode
-;;   :hook ((elixir-mode . flycheck-mode)))
+(use-package flycheck
+  :init (global-flycheck-mode)
+  :config
+  ;; Make flycheck indicators more subtle
+  (custom-set-faces
+   '(flycheck-error ((t (:underline (:color "#742828" :style line)))))
+   '(flycheck-warning ((t (:underline (:color "#742828" :style line)))))
+   '(flycheck-info ((t (:underline (:color "#415141" :style line))))))
 
-;; (use-package flycheck-credo
-;;   :after flycheck
-;;   :config
-;;   (eval-after-load 'flycheck '(flycheck-credo-setup))
-;;   :custom
-;;   (flycheck-elixir-credo-strict t))
+  ;; For an alternative aesthetic
+  ;; (custom-set-faces
+  ;;  '(flycheck-error ((t (:background "#742828"))))
+  ;;  '(flycheck-warning ((t (:background "#742828"))))
+  ;;  '(flycheck-info ((t (:background "#1f231f")))))
+
+  (with-eval-after-load 'flycheck
+    ;; Disable checkdoc - this checks documentation style
+    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc))
+
+    ;; Specifically handle free variable warnings with byte-compiler options
+    (setq-default flycheck-emacs-lisp-load-path 'inherit)
+    (setq-default flycheck-emacs-lisp-check-form
+                  "(progn (setq byte-compile-warnings '(not free-vars unresolved)) (batch-byte-compile))"))
+
+  ;; (with-eval-after-load 'flycheck
+  ;;   (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc))
+  ;;   (setq-default flycheck-emacs-lisp-variables-indent-listed t)
+  ;;   (add-to-list 'flycheck-emacs-lisp-variables-non-standard
+  ;;                "^[a-zA-Z0-9-]+-.+$"))
+
+  (setq flycheck-indication-mode 'left-fringe)
+  ;; Use smaller, more subtle fringe bitmaps
+  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+    [0 0 0 0 0 16 48 112 112 48 16 0 0 0 0 0])
+  ;; Make error highlighting more subtle
+  (setq flycheck-highlighting-mode 'lines)
+  ;; Check syntax on save and mode-enabled
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (setq flycheck-highlighting-mode 'symbols)
+  (setq flycheck-error-list-minimum-level 'error)
+  (setq flycheck-idle-change-delay 0.5))
 
 (use-package helpful
   :bind (("C-h f" . 'helpful-callable)
@@ -333,13 +364,28 @@
 ;;   (popper-mode +1)
 ;;   (popper-echo-mode +1))
 
-(use-package xref
-  :straight (:type built-in)
-  :custom
-  (xref-search-program 'ripgrep)
-  :config
-  ;; (defalias 'xref-find-definitions 'kg/xref-find-definitions)
-  )
+;; (use-package xref
+;;   :straight (:type built-in)
+;;   :custom
+;;   (xref-search-program 'ripgrep)
+;;   ;; Disable tags-based backend entirely
+;;   (xref-backend-functions (remove 'etags--xref-backend xref-backend-functions))
+;;   :config
+;;   (setq-default xref-search-program 'ripgrep)
+;;   (setq xref-search-program-extra-args
+;;         '("--null" "--line-buffered" "--color=never" "--max-columns=1000"))
+;;   ;; Create a custom xref backend that will fall back to ripgrep
+;;   (defun ripgrep-xref-backend ()
+;;     "Custom xref backend using ripgrep."
+;;     (lambda (pattern files dir ignores)
+;;       (let ((xref-ripgrep-command
+;;              (format "rg --no-heading --with-filename --line-number -n %s"
+;;                      pattern)))
+;;         (xref-matches-in-directory pattern dir))))
+
+;;   ;; Add our backend to the list
+;;   (add-to-list 'xref-backend-functions 'ripgrep-xref-backend)
+;;   )
 
 (use-package apheleia
   :straight t
@@ -411,6 +457,7 @@
 (use-package indent-bars
   :straight t
   :commands (indent-bars-mode)
+  :hook (prog-mode . indent-bars-mode)
   :custom
   (indent-bars-pattern ".")
   (indent-bars-width-frac 0.1)
@@ -542,22 +589,6 @@
 ;;   (key-chord-define-global "QQ" 'delete-window)
 ;;   (key-chord-define-global "11" 'delete-other-windows))
 
-;; (use-package fzf-native
-;;   :straight
-;;   (:repo "dangduc/fzf-native"
-;;          :host github
-;;          :files (:defaults "bin"))
-;;   :config
-;;   (fzf-native-load-dyn)
-;;   (setq fussy-score-fn 'fussy-fzf-native-score))
-
-;; (use-package fussy
-;;   :config
-;;   (setq fussy-score-ALL-fn 'fussy-fzf-score)
-;;   (setq fussy-filter-fn 'fussy-filter-default)
-;;   (fussy-setup)
-;;   (fussy-company-setup))
-
 ;;;; +++++++++++++++++++
 ;;;; MISC
 ;;;; +++++++++++++++++++
@@ -577,6 +608,16 @@
   :config
   (global-set-key (kbd "<f5>") 'neotree-toggle))
 
+(use-package editorconfig)
+(use-package jsonrpc)
+(use-package transient)
+
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+
 ;; =========================================================
 ;;                        LLM
 ;; =========================================================
@@ -593,19 +634,9 @@
   (setopt ellama-provider
 	        (make-llm-ollama :chat-model "llama3.1:latest")))
 
-(use-package editorconfig)
-(use-package jsonrpc)
-(use-package transient)
-
-(use-package orderless
-  :ensure t
-  :custom
-  (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
-
 (use-package minuet
   :init
-  (add-hook 'prog-mode-hook #'minuet-auto-suggestion-mode)
+  ;; (add-hook 'prog-mode-hook #'minuet-auto-suggestion-mode)
   :config
   (setq minuet-provider 'openai-fim-compatible)
   (setq minuet-n-completions 1) ; recommended for Local LLM for resource saving
@@ -726,38 +757,33 @@
   "When copilot should not automatically show completions."
   (or (member major-mode kg/no-copilot-modes)))
 
-;; (add-to-list 'copilot-disable-predicates #'kg/copilot-disable-predicate)
+(add-to-list 'copilot-disable-predicates #'kg/copilot-disable-predicate)
 
-;; (defun kg/copilot-quit ()
-;;   "Run `copilot-clear-overlay' or `keyboard-quit'. If copilot is
-;; cleared, make sure the overlay doesn't come back too soon."
-;;   (interactive)
-;;   (condition-case err
-;;       (when copilot--overlay
-;;         (lexical-let ((pre-copilot-disable-predicates copilot-disable-predicates))
-;;           (setq copilot-disable-predicates (list (lambda () t)))
-;;           (copilot-clear-overlay)
-;;           (run-with-idle-timer
-;;            1.0
-;;            nil
-;;            (lambda ()
-;;              (setq copilot-disable-predicates pre-copilot-disable-predicates)))))
-;;     (error handler)))
+(defun kg/copilot-quit ()
+  "Run `copilot-clear-overlay' or `keyboard-quit'. If copilot is
+cleared, make sure the overlay doesn't come back too soon."
+  (interactive)
+  (condition-case err
+      (when copilot--overlay
+        (lexical-let ((pre-copilot-disable-predicates copilot-disable-predicates))
+                     (setq copilot-disable-predicates (list (lambda () t)))
+                     (copilot-clear-overlay)
+                     (run-with-idle-timer
+                      1.0
+                      nil
+                      (lambda ()
+                        (setq copilot-disable-predicates pre-copilot-disable-predicates)))))
+    (error handler)))
 
-;; (advice-add 'keyboard-quit :before #'kg/copilot-quit)
+(advice-add 'keyboard-quit :before #'kg/copilot-quit)
 
-;; (defun load-local (file)
-;;   (load (f-expand file user-emacs-directory)))
-
-;; (load-local "init-efuns")
-
+;; Load custom functions
 (load "/Users/kiran/.emacs.d/init-efuns.el")
 
 ;; =========================================================
 ;;                      GLOBAL KEYBINDINGS
 ;; =========================================================
 
-;; (global-set-key (kbd "s-p") 'projectile-switch-project)
 (global-set-key (kbd "s-g") 'kg/search-marked-region-if-available)
 (global-set-key (kbd "s-l") 'consult-line)
 (global-set-key (kbd "s-t") 'projectile-find-file)
