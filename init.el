@@ -13,6 +13,10 @@
 
 (setq package-enable-at-startup nil)
 
+;; Add to your init.el before loading use-package
+(setq straight-built-in-pseudo-packages
+      '(emacs project eglot xref cl-lib))
+
 ;; Bootstrap configuration for straight.el
 (setq straight-use-package-by-default t
       ;;      use-package-always-defer t

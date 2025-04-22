@@ -392,6 +392,15 @@
   (setq vc-git-diff-switches '("--histogram"))
   (global-diff-hl-mode))
 
+(use-package project
+  :ensure nil
+  :straight nil)
+
+(use-package eglot
+  :after project
+  :ensure nil
+  :straight nil)
+
 (use-package eglot-booster
   :straight (eglot-booster :type git
                            :host github
