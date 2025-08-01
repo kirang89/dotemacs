@@ -109,8 +109,21 @@
 ;;
 
 ;; Make native compilation silent and prune its cache.
+;; https://www.masteringemacs.org/article/speed-up-emacs-libjansson-native-elisp-compilation
+(if (and (fboundp 'native-comp-available-p)
+         (native-comp-available-p))
+    (setq comp-deferred-compilation t
+          package-native-compile t)
+  (message "Native complation is *not* available, lsp performance will suffer..."))
+
+(unless (functionp 'json-serialize)
+  (message "Native JSON is *not* available, lsp performance will suffer..."))
+
 (setq native-comp-async-report-warnings-errors 'silent)
 (setq native-compile-prune-cache t)
+
+;; do not steal focus while doing async compilations
+(setq warning-suppress-types '((comp)))
 
 ;; Use y/n instead of full yes/no for confirmation messages
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -199,6 +212,10 @@
 
   :config
   (setq consult-find-args "find . -not ( -path */.[A-Za-z]* -prune )")
+  ;; consult-ripgrep optimisations
+  (setq consult-async-refresh-delay 0.15  ; Default: 0.2
+        consult-async-input-throttle 0.2  ; Default: 0.3
+        consult-async-input-debounce 0.1)   ; Default: 0.2
 
   )
 
@@ -352,6 +369,7 @@
   (add-hook 'cider-mode-hook #'company-mode)
   (add-hook 'cider-mode-hook
             (lambda ()
+              (local-set-key (kbd "M-.") 'xref-find-definitions)
               (local-set-key (kbd "<C-return>") 'cider-eval-last-sexp)
               (local-set-key (kbd "C-c C-n") 'cider-eval-buffer)
               (local-set-key (kbd "C-x C-i") 'cider-inspect-last-sexp))))

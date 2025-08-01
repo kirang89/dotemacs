@@ -175,4 +175,13 @@
     (unless xref-used
       (kg/rg-find-definitions))))
 
+(defun kg/consult-line-with-region ()
+  "Run consult-line with selected region as initial input."
+  (interactive)
+  (let ((initial-input (if (use-region-p)
+                           (buffer-substring-no-properties
+                            (region-beginning) (region-end))
+                         nil)))
+    (consult-line initial-input)))
+
 (provide 'init-efuns)
