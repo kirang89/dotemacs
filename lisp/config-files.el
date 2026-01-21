@@ -8,7 +8,7 @@
 ;;;; Auto-revert
 (global-auto-revert-mode 1)
 (setq auto-revert-verbose nil)
-(setq auto-revert-check-vc-info t)
+(setq auto-revert-check-vc-info nil)
 
 ;;;; Backup Settings
 (setq backup-inhibited t

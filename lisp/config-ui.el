@@ -31,21 +31,24 @@
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
 
-;; Enable pixel-precise scrolling
-(pixel-scroll-precision-mode 1)
+;; Conservative scrolling (faster than pixel-scroll-precision-mode)
+(setq scroll-conservatively 101
+      scroll-margin 3
+      scroll-preserve-screen-position t)
 
 ;; Line numbers
 (setq linum-format "%5d ")
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
-;;;; hl-line
-(global-hl-line-mode 1)
-(set-face-background 'hl-line "#2a2a3e")
-(set-face-attribute 'hl-line nil :underline nil)
+;;;; hl-line (buffer-local for performance)
+(add-hook 'prog-mode-hook #'hl-line-mode)
+(with-eval-after-load 'hl-line
+  (set-face-background 'hl-line "#2a2a3e")
+  (set-face-attribute 'hl-line nil :underline nil))
 
-;;;; Transparency
-(set-frame-parameter (selected-frame) 'alpha '(93 . 93))
-(add-to-list 'default-frame-alist '(alpha . (93 . 93)))
+;;;; Transparency (disabled for performance)
+;; (set-frame-parameter (selected-frame) 'alpha '(93 . 93))
+;; (add-to-list 'default-frame-alist '(alpha . (93 . 93)))
 
 ;;;; Window Divider
 (use-package frame

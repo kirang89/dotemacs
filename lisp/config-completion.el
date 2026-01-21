@@ -101,7 +101,7 @@
   (corfu-on-exact-match 'quit)
   (corfu-preselect-first t)
   (corfu-quit-at-boundary 'separator)
-  (corfu-auto-delay 0.1)
+  (corfu-auto-delay 0.2)
   (corfu-auto-prefix 3)
   (corfu-quit-no-match t)
   (corfu-scroll-margin 5))

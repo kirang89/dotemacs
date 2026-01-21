@@ -55,7 +55,9 @@
                                   (ignored . "i")))
   :config
   (setq vc-git-diff-switches '("--histogram"))
-  (add-hook 'prog-mode-hook #'diff-hl-mode))
+  ;; Disabled for performance - enable manually with M-x diff-hl-mode
+  ;; (add-hook 'prog-mode-hook #'diff-hl-mode)
+  )
 
 ;;;; Git Timemachine
 (use-package git-timemachine)

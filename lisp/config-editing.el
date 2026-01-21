@@ -23,7 +23,7 @@
 ;;;; Paren Matching
 (require 'paren)
 (show-paren-mode 1)
-(setq show-paren-delay 0.125)
+(setq show-paren-delay 0.3)
 (set-face-background 'show-paren-match (face-background 'default))
 (if (eq (frame-parameter nil 'background-mode) 'dark)
     (set-face-foreground 'show-paren-match "purple")

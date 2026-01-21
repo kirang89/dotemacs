@@ -53,7 +53,7 @@
   (setq flycheck-check-syntax-automatically '(save mode-enabled))
   (setq flycheck-highlighting-mode 'symbols)
   (setq flycheck-error-list-minimum-level 'error)
-  (setq flycheck-idle-change-delay 0.5))
+  (setq flycheck-idle-change-delay 0.75))
 
 (use-package helpful
   :defer t
@@ -108,8 +108,8 @@
 (use-package harpoon)
 
 (use-package key-chord
-  :hook
-  (prog-mode . key-chord-mode)
+  ;; Disabled for performance - enable manually with M-x key-chord-mode
+  ;; :hook (prog-mode . key-chord-mode)
   :config
   (setq key-chord-two-keys-delay 0.2)
   (key-chord-define-global "j1" (lambda () (interactive) (harpoon-go-to 1)))
