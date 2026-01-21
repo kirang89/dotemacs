@@ -148,7 +148,6 @@
   :hook ((tuareg-mode . (lambda ()
                           (eglot-ensure)
                           (eldoc-mode 1)
-                          (eldoc-box-hover-at-point-mode 1)
                           (setq-local eldoc-idle-delay 0.2)))))
 
 (use-package merlin-eldoc

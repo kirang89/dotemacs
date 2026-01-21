@@ -6,12 +6,12 @@
 ;;; Code:
 
 ;;;; Font Configuration
-(defconst font "Google Sans Code")
-(defconst org-code-block-font "JetBrains Mono")
-(defconst org-variable-pitch-font "SF Pro")
+(defconst kg/mono-font "Google Sans Code")
+(defconst kg/org-code-font "JetBrains Mono")
+(defconst kg/variable-pitch-font "SF Pro")
 
 (set-face-attribute 'default nil
-                    :family "Google Sans Code"
+                    :family kg/mono-font
                     :height 160
                     :weight 'normal
                     :width 'normal)
@@ -97,8 +97,8 @@
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
   :init
-  (set-face-attribute 'mode-line nil :family font :height 150)
-  (set-face-attribute 'mode-line-inactive nil :family font :height 150)
+  (set-face-attribute 'mode-line nil :family kg/mono-font :height 150)
+  (set-face-attribute 'mode-line-inactive nil :family kg/mono-font :height 150)
   :config
   ;; Don't compact font caches during GC.
   (setq inhibit-compacting-font-caches t)
@@ -119,7 +119,8 @@
         doom-modeline-irc nil
         doom-modeline-persp-name nil
         doom-modeline-window-width-limit fill-column
-        doom-modeline-lsp t))
+        doom-modeline-lsp nil               ; Disabled for performance - updates on every LSP message
+        doom-modeline-env-version nil))
 
 ;;;; Context Menu (Emacs 28+)
 (when (display-graphic-p)

@@ -78,6 +78,12 @@
 (use-package corfu
   :defer 0.1
   :straight (corfu :repo "minad/corfu" :branch "main" :files (:defaults "extensions/*.el"))
+  :bind (:map corfu-map
+              ("TAB" . corfu-next)
+              ([tab] . corfu-next)
+              ("RET" . corfu-complete-and-quit)
+              ("<return>" . corfu-complete-and-quit)
+              ([remap completion-at-point] . corfu-complete))
   :config
   (defun corfu-complete-and-quit ()
     (interactive)
@@ -86,15 +92,9 @@
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
   (global-corfu-mode 1)
   (corfu-popupinfo-mode 1)
-  :bind  (:map corfu-map
-               ("TAB" . corfu-next)
-               ([tab] . corfu-next)
-               ("RET" . corfu-complete-and-quit)
-               ("<return>" . corfu-complete-and-quit)
-               ([remap completion-at-point] . corfu-complete))
-  :custom-face
-  (corfu-default ((t (:family "CommitMono"))))
-  (corfu-current ((t (:family "CommitMono"))))
+  ;; Set font faces (inherit colors from theme)
+  (set-face-attribute 'corfu-default nil :family kg/mono-font)
+  (set-face-attribute 'corfu-current nil :family kg/mono-font :inherit 'highlight)
   :custom
   (corfu-auto t)
   (corfu-cycle nil)
@@ -110,9 +110,10 @@
 
 ;;;; Cape (completion-at-point extensions)
 (use-package cape
-  :defer t
   :after corfu
   :init
+  ;; Add fallback completions (order matters - last = lowest priority)
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev t)  ; Words in buffer (fallback)
   (add-to-list 'completion-at-point-functions #'cape-file))
 
 (provide 'config-completion)

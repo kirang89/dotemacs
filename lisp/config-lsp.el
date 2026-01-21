@@ -20,33 +20,44 @@
 ;;;; Eldoc
 (use-package eldoc
   :config
-  (global-eldoc-mode 1)
+  ;; Only enable in programming modes (not globally) for performance
+  (global-eldoc-mode -1)
+  (add-hook 'prog-mode-hook #'eldoc-mode)
   (setq eldoc-echo-area-use-multiline-p nil
-        eldoc-idle-delay 0.5)            ; Wait 0.5s before showing
+        eldoc-idle-delay 0.75)           ; Wait 0.75s before showing (was 0.5)
   :custom-face
   (tooltip ((t (:inherit default :box nil)))))
 
 ;;;; Eglot
 (use-package eglot
-  :defer t
   :hook
   ((python-mode . eglot-ensure)
+   (python-ts-mode . eglot-ensure)
    (ruby-mode . eglot-ensure)
+   (ruby-ts-mode . eglot-ensure)
    (js-mode . eglot-ensure)
+   (js-ts-mode . eglot-ensure)
    (clojure-mode . eglot-ensure)
    (tuareg-mode . eglot-ensure)
-   (go-mode . eglot-ensure))
-  :after project
-  :after xref
+   (go-mode . eglot-ensure)
+   (go-ts-mode . eglot-ensure))
   :ensure nil
   :straight nil
   :config
+  ;; Use pyright for Python (provides completions, unlike ruff)
+  (add-to-list 'eglot-server-programs
+               '((python-mode python-ts-mode) . ("pyright-langserver" "--stdio")))
   (setq eglot-connect-timeout 60
-        eglot-sync-connect nil
-        eglot-events-buffer-size 0
+        eglot-sync-connect nil            ; Non-blocking connection
+        eglot-events-buffer-size 0        ; Disable event logging
         eglot-autoshutdown t
         eglot-send-changes-idle-time 0.5  ; Debounce changes
-        eglot-extend-to-xref t))          ; Better xref integration
+        eglot-extend-to-xref t            ; Better xref integration
+        ;; Disable features that run on every cursor move
+        eglot-ignored-server-capabilities
+        '(:documentHighlightProvider      ; Don't highlight all occurrences of symbol
+          :inlayHintProvider)             ; Don't show inline type hints
+        eglot-report-progress nil))       ; Don't show LSP progress spinner
 
 ;;;; Eglot Booster
 (use-package eglot-booster
@@ -67,17 +78,18 @@
   (setq dumb-jump-force-searcher 'rg)
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 
-;;;; Eldoc Box
-(use-package eldoc-box
-  :hook
-  (eglot-managed-mode . eldoc-box-hover-at-point-mode)
-  :config
-  (setq eldoc-box-clear-with-C-g t
-        eldoc-box-max-pixel-height 600
-        eldoc-box-max-pixel-width 800)
-  :custom-face
-  (eldoc-box-border ((t (:background unspecified :foreground unspecified))))
-  (eldoc-box-body ((t (:inherit default)))))
+;;;; Eldoc Box - DISABLED for performance
+;;;; Documentation shows in echo area instead (posframes are expensive)
+;; (use-package eldoc-box
+;;   :hook
+;;   (eglot-managed-mode . eldoc-box-hover-at-point-mode)
+;;   :config
+;;   (setq eldoc-box-clear-with-C-g t
+;;         eldoc-box-max-pixel-height 600
+;;         eldoc-box-max-pixel-width 800)
+;;   :custom-face
+;;   (eldoc-box-border ((t (:background unspecified :foreground unspecified))))
+;;   (eldoc-box-body ((t (:inherit default)))))
 
 (provide 'config-lsp)
 ;;; config-lsp.el ends here

@@ -84,8 +84,9 @@
   (dape-cwd-function #'projectile-project-root))
 
 (use-package repeat
-  :custom
-  (repeat-mode +1))
+  :config
+  (let ((inhibit-message t))
+    (repeat-mode 1)))
 
 (use-package midnight
   :defer 30
@@ -132,8 +133,9 @@
 (use-package gcmh
   :demand t
   :config
-  (setq gcmh-idle-delay 15           ; Wait 15s idle before GC
-        gcmh-high-cons-threshold (* 64 1024 1024)  ; 64MB during activity
+  (setq gcmh-idle-delay 30                              ; Wait 30s idle before GC (was 15)
+        gcmh-high-cons-threshold (* 128 1024 1024)      ; 128MB during activity (was 64MB)
+        gcmh-low-cons-threshold (* 16 1024 1024)        ; 16MB floor
         gcmh-verbose nil)
   (gcmh-mode 1))
 

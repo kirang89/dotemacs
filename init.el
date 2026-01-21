@@ -10,7 +10,7 @@
 ;;;; ==========================================================
 
 (setq straight-built-in-pseudo-packages
-      '(emacs use-package project eglot xref cl-lib eldoc flymake repeat jsonrpc))
+      '(emacs project eglot xref cl-lib eldoc flymake repeat jsonrpc))
 
 (setq straight-use-package-by-default t
       straight-cache-autoloads t
@@ -31,8 +31,8 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;; use-package is built-in since Emacs 29
-(require 'use-package)
+;; use-package is built-in since Emacs 29, but we need straight.el integration
+(straight-use-package 'use-package)
 (setq use-package-always-ensure nil)
 
 ;;;; ==========================================================
@@ -56,6 +56,9 @@
 (setq use-short-answers t)
 
 ;; General settings
+;; Disable cursor blinking (saves redisplay cycles)
+(blink-cursor-mode -1)
+
 (setq ring-bell-function 'ignore
       use-dialog-box t
       use-file-dialog nil
@@ -90,6 +93,13 @@
 (setq long-line-threshold 10000
       large-hscroll-threshold 10000
       syntax-wholeline-max 10000)
+
+;; JIT-lock: defer fontification during typing for snappier input
+(setq jit-lock-defer-time 0.05            ; Wait 50ms before coloring (imperceptible)
+      jit-lock-stealth-time 1.5           ; Color off-screen text after 1.5s idle
+      jit-lock-stealth-nice 0.5           ; Be gentle during background fontification
+      jit-lock-chunk-size 2000            ; Smaller chunks = less blocking
+      jit-lock-stealth-load 100)          ; Only fontify when CPU load < 100%
 
 ;; Check for native JSON
 (unless (functionp 'json-serialize)

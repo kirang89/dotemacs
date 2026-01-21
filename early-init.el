@@ -7,6 +7,13 @@
 (setq gc-cons-threshold 50000000
       gc-cons-percentage 0.6)
 
+;; Skip fontification during rapid input - major typing responsiveness boost
+(setq redisplay-skip-fontification-on-input t)
+
+;; Disable bidirectional text processing (not needed for LTR-only languages)
+(setq-default bidi-paragraph-direction 'left-to-right)
+(setq bidi-inhibit-bpa t)
+
 ;; Prevent frame resizing during startup
 (setq frame-inhibit-implied-resize t
       frame-resize-pixelwise t)
