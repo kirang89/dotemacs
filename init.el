@@ -223,7 +223,7 @@
 ;;;;                    CLEANUP
 ;;;; ==========================================================
 
-;; Reset GC after startup
+;; Reset GC after startup (fallback if GCMH fails to load)
 (add-hook 'emacs-startup-hook
           (lambda ()
             (setq gc-cons-threshold 16777216

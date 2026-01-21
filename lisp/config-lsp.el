@@ -21,7 +21,8 @@
 (use-package eldoc
   :config
   (global-eldoc-mode 1)
-  (setq eldoc-echo-area-use-multiline-p nil)
+  (setq eldoc-echo-area-use-multiline-p nil
+        eldoc-idle-delay 0.5)            ; Wait 0.5s before showing
   :custom-face
   (tooltip ((t (:inherit default :box nil)))))
 
@@ -43,7 +44,9 @@
   (setq eglot-connect-timeout 60
         eglot-sync-connect nil
         eglot-events-buffer-size 0
-        eglot-autoshutdown t))
+        eglot-autoshutdown t
+        eglot-send-changes-idle-time 0.5  ; Debounce changes
+        eglot-extend-to-xref t))          ; Better xref integration
 
 ;;;; Eglot Booster
 (use-package eglot-booster
@@ -53,6 +56,8 @@
                            :branch "main")
   :after eglot
   :config
+  ;; Emacs 30 has faster JSON parser, use IO-only mode
+  (setq eglot-booster-io-only t)
   (eglot-booster-mode))
 
 ;;;; Dumb Jump (fallback)

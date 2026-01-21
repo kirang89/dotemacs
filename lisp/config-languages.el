@@ -244,7 +244,8 @@
 ;;;; =========================================================
 
 (when (treesit-available-p)
-  (setq treesit-font-lock-level 3)  ; Level 3 for performance
+  (setq treesit-font-lock-level 3              ; Level 3 for performance
+        treesit-max-buffer-size (* 1024 1024)) ; 1MB max for tree-sitter
   (use-package treesit-auto
     :ensure t
     :config

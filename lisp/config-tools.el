@@ -127,6 +127,16 @@
   :config
   (add-hook 'after-init-hook 'benchmark-init/deactivate))
 
+;;;; GCMH (Garbage Collector Magic Hack)
+;; Smarter GC - only runs during idle time
+(use-package gcmh
+  :demand t
+  :config
+  (setq gcmh-idle-delay 15           ; Wait 15s idle before GC
+        gcmh-high-cons-threshold (* 64 1024 1024)  ; 64MB during activity
+        gcmh-verbose nil)
+  (gcmh-mode 1))
+
 (use-package apheleia
   :straight t
   :hook (prog-mode . apheleia-mode)
