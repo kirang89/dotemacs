@@ -58,10 +58,12 @@
   (setq-default projectile-cache-file
                 (expand-file-name ".projectile-cache" user-emacs-directory))
   :config
-  (setq-default projectile-enable-caching t
-                projectile-mode-line-prefix ""
-                projectile-sort-order 'recentf
-                projectile-mode-line '(:eval (projectile-project-name))))
+  (setq projectile-indexing-method 'alien         ; Use git/fd - fastest
+        projectile-enable-caching 'persistent     ; Survives restarts
+        projectile-git-submodule-command nil      ; Skip slow submodule scanning
+        projectile-mode-line-prefix ""
+        projectile-sort-order 'recentf
+        projectile-mode-line '(:eval (projectile-project-name))))
 
 ;;;; Find Sibling File (Emacs 29+)
 ;; Navigate between related files (implementation ↔ test)
@@ -85,10 +87,16 @@
 (global-set-key (kbd "C-c s") 'find-sibling-file)
 
 ;;;; Find File in Project
+;; Add custom directories to ffip-prune-patterns to exclude from search
 (use-package find-file-in-project
+  :commands (find-file-in-project find-file-in-project-by-selected)
+  :bind (("s-t" . find-file-in-project))
   :config
-  (setq ffip-use-rust-fd t)
-  (global-set-key (kbd "s-t") 'find-file-in-project))
+  (setq ffip-use-rust-fd t
+        ffip-prune-patterns '("*/.git" "*/node_modules" "*/target" "*/build"
+                              "*/dist" "*/.svn" "*/coverage" "*/__pycache__")
+        ffip-find-options "-not -size +64k"
+        ffip-limit 2000))
 
 (provide 'config-files)
 ;;; config-files.el ends here

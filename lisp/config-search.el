@@ -7,20 +7,31 @@
 
 ;;;; Ripgrep
 (use-package rg
+  :commands (rg rg-project rg-dwim rg-literal)
   :config
-  (setq rg-command-line-flags '("-w"))
-  (setq rg-ignore-case 'smart)
+  (setq rg-command-line-flags
+        '("-w"
+          "-M" "500"              ; Skip lines >500 chars
+          "-m" "100"              ; Max 100 matches per file
+          "--max-filesize" "1M"
+          "-j" "0"                ; Use ALL cores
+          "--mmap"                ; Memory-map files (faster for large files)
+          "--engine" "auto"))     ; Let rg pick fastest regex engine
+  (setq rg-ignore-case 'smart
+        rg-group-result t         ; Group by file (less rendering)
+        rg-show-header nil)       ; Skip header rendering
+
+  (setq rg-custom-type-aliases
+        '(("all" . "*.{el,py,rb,js,ts,go,rs,c,h,cpp,java,clj}")))
 
   (rg-define-search kg/grep-vc-or-dir
     :query ask
     :format regexp
     :files "everything"
     :dir (let ((vc (vc-root-dir)))
-           (if vc
-               vc
-             default-directory))
+           (if vc vc default-directory))
     :confirm prefix
-    :flags ("--hidden -g !.git")))
+    :flags ("--hidden" "-g" "!.git" "-g" "!node_modules" "-g" "!target" "-g" "!build")))
 
 ;;;; Deadgrep
 (use-package deadgrep)

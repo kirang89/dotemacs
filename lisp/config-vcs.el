@@ -15,9 +15,20 @@
   :config
   (setq magit-commit-show-diff nil
         magit-save-repository-buffers 'dontask
-        magit-revert-buffers 'silent
-        magit-format-file-function #'magit-format-file-nerd-icons)
-  (setq magit-commit-ask-to-stage nil)
+        magit-format-file-function #'magit-format-file-nerd-icons
+        magit-commit-ask-to-stage nil
+        ;; Performance settings
+        magit-refresh-status-buffer nil
+        magit-diff-refine-hunk nil
+        magit-diff-highlight-trailing nil
+        magit-diff-paint-whitespace nil
+        magit-revision-show-gravatars nil
+        magit-log-arguments '("-n256" "--graph" "--decorate"))
+  ;; Collapse stashes by default
+  (setq magit-section-initial-visibility-alist '((stashes . hide)))
+  ;; Remove slow remote-checking sections
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-pushremote)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
   (remove-hook 'server-switch-hook 'magit-commit-diff)
   (remove-hook 'with-editor-filter-visit-hook 'magit-commit-diff)
   (defun my/magit-commit-quick ()

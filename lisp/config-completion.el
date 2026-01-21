@@ -39,7 +39,7 @@
 
   :config
   (setq consult-find-args "fd --type f --exclude '.git' --exclude '.svn' --exclude 'node_modules'"
-        consult-ripgrep-args "rg --null --line-buffered --color=never --max-columns=500 --max-count=50 --path-separator=/ --smart-case --no-heading --with-filename --line-number --threads=8 --max-filesize=1M --glob=!.git/ --glob=!node_modules/ --glob=!target/ --glob=!build/ --glob=!dist/ --glob=!coverage/ --glob=!*.min.js --glob=!*.map --glob=!*.log --glob=!*.png --glob=!*.jpg --glob=!*.gif --glob=!*.svg --glob=!*.ico --glob=!*.woff --glob=!*.woff2 --glob=!*.ttf --glob=!*.eot"
+        consult-ripgrep-args "rg --null --line-buffered --color=never --max-columns=500 --max-count=50 --path-separator=/ --smart-case --no-heading --with-filename --line-number --threads=0 --max-filesize=1M --glob=!.git/ --glob=!node_modules/ --glob=!target/ --glob=!build/ --glob=!dist/ --glob=!coverage/ --glob=!*.min.js --glob=!*.map --glob=!*.log --glob=!*.png --glob=!*.jpg --glob=!*.gif --glob=!*.svg --glob=!*.ico --glob=!*.woff --glob=!*.woff2 --glob=!*.ttf --glob=!*.eot"
         consult-line-start-from-top nil
         consult-async-refresh-delay 0.3
         consult-async-input-throttle 0.4
