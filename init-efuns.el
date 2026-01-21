@@ -9,7 +9,7 @@
   (other-window 1))
 
 (defun kg/beginning-of-line-dwim ()
-  "Toggle between moving point to the first non-whitespace character, and the start of the line."
+  "Toggle between moving point to the first non-whiteospace character, and the start of the line."
   (interactive)
   (let ((start-position (point)))
     ;; Move to the first non-whitespace character.
@@ -182,6 +182,140 @@
                            (buffer-substring-no-properties
                             (region-beginning) (region-end))
                          nil)))
+    (when (use-region-p)
+      (deactivate-mark))
     (consult-line initial-input)))
+
+(defun kg/consult-ripgrep-with-region ()
+  "Run consult-ripgrep with selected region as initial input."
+  (interactive)
+  (let ((initial-input (if (use-region-p)
+                           (buffer-substring-no-properties
+                            (region-beginning) (region-end))
+                         nil)))
+    (when (use-region-p)
+      (deactivate-mark))
+    (consult-ripgrep nil initial-input)))
+
+(defun kg/eval-root-expression ()
+  "Evaluate the root expression that contains point."
+  (interactive)
+  (save-excursion
+    (let ((current-pos (point)))
+      (condition-case nil
+          (while t
+            (backward-up-list)
+            (when (= (point) current-pos)
+              (error "No more lists"))
+            (setq current-pos (point)))
+        (error nil))
+      (forward-sexp)
+      (eval-last-sexp nil))))
+
+(defun kg/fast-grep (search-term)
+  "Ultra-fast ripgrep search with minimal Emacs overhead."
+  (interactive "sSearch: ")
+  (let* ((project-root (or (projectile-project-root) default-directory))
+         (cmd (format "rg --vimgrep --smart-case --hidden --threads=8 %s %s"
+                      (shell-quote-argument search-term)
+                      (shell-quote-argument project-root)))
+         ;; Use compilation-mode for fast results viewing
+         (compilation-buffer (compilation-start cmd 'grep-mode)))
+    (pop-to-buffer compilation-buffer)))
+
+;; 3. Fastest possible search - current word
+(defun kg/fast-grep-symbol ()
+  "Instantly grep for symbol at point."
+  (interactive)
+  (when-let ((symbol (thing-at-point 'symbol t)))
+    (kg/fast-grep (format "\\b%s\\b" symbol))))
+
+(defun kg/telescope-grep ()
+  "Telescope-like grep with enhanced UX."
+  (interactive)
+  (let ((consult-ripgrep-args
+         "rg --null --line-buffered --color=never --max-columns=1000 --path-separator=/ --smart-case --no-heading --with-filename --line-number --search-zip --hidden --glob=!.git/ --threads=8"))
+    (consult-ripgrep)))
+
+;; 9. Live grep (search as you type)
+(defun kg/telescope-live-grep ()
+  "Live grep that starts searching immediately."
+  (interactive)
+  (let ((initial-input (if (use-region-p)
+                           (buffer-substring-no-properties
+                            (region-beginning) (region-end))
+                         "")))
+    (consult-ripgrep nil initial-input)))
+
+(defun kg/copy-line-if-no-region (orig-fun &rest args)
+  "Copy current line if no region is active."
+  (if (region-active-p)
+      (apply orig-fun args)
+    (kill-ring-save (line-beginning-position)
+                    (line-end-position))))
+
+(defun kg/swiper-region ()
+  "Run `swiper' with the active region as the initial input."
+  (interactive)
+  (if (use-region-p)
+      (let ((init (buffer-substring-no-properties (region-beginning) (region-end))))
+        (deactivate-mark)
+        (swiper init))
+    (swiper)))
+
+(defun kg/setup-imenu-expressions ()
+  "Set up imenu expressions for different major modes."
+  (pcase major-mode
+    ;; Clojure
+    ('clojure-mode
+     (setq imenu-generic-expression
+           '(("Functions" "^\\s-*(defn-?\\s-+\\(.*?\\)\\s-*" 1)
+             ("Macros" "^\\s-*(defmacro\\s-+\\(.*?\\)\\s-*" 1)
+             ("Variables" "^\\s-*(def\\s-+\\(.*?\\)\\s-*" 1)
+             ("Protocols" "^\\s-*(defprotocol\\s-+\\(.*?\\)\\s-*" 1)
+             ("Records" "^\\s-*(defrecord\\s-+\\(.*?\\)\\s-*" 1)
+             ("Multimethods" "^\\s-*(defmulti\\s-+\\(.*?\\)\\s-*" 1)
+             ("Types" "^\\s-*(deftype\\s-+\\(.*?\\)\\s-*" 1))))
+
+    ;; Emacs Lisp
+    ('emacs-lisp-mode
+     (setq imenu-generic-expression
+           '(("Functions" "^\\s-*(defun\\s-+\\(.*?\\)\\s-*(" 1)
+             ("Macros" "^\\s-*(defmacro\\s-+\\(.*?\\)\\s-*(" 1)
+             ("Variables" "^\\s-*(defvar\\s-+\\(.*?\\)\\s-*" 1)
+             ("Custom Variables" "^\\s-*(defcustom\\s-+\\(.*?\\)\\s-*" 1)
+             ("Groups" "^\\s-*(defgroup\\s-+\\(.*?\\)\\s-*" 1)
+             ("Faces" "^\\s-*(defface\\s-+\\(.*?\\)\\s-*" 1)
+             ("Advice" "^\\s-*(defadvice\\s-+\\(.*?\\)\\s-*" 1))))
+
+    ;; Python
+    ('python-mode
+     (setq imenu-generic-expression
+           '(("Classes" "^class\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Functions" "^def\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Async Functions" "^async\\s-+def\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Methods" "^\\s-+def\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Variables" "^\\([a-zA-Z_][a-zA-Z0-9_]*\\)\\s-*=" 1))))
+
+    ;; Ruby
+    ('ruby-mode
+     (setq imenu-generic-expression
+           '(("Classes" "^\\s-*class\\s-+\\([a-zA-Z_][a-zA-Z0-9_:]*\\)" 1)
+             ("Modules" "^\\s-*module\\s-+\\([a-zA-Z_][a-zA-Z0-9_:]*\\)" 1)
+             ("Methods" "^\\s-*def\\s-+\\([a-zA-Z_][a-zA-Z0-9_?!]*\\)" 1)
+             ("Constants" "^\\s-*\\([A-Z][A-Z0-9_]*\\)\\s-*=" 1)
+             ("Instance Variables" "@\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Class Variables" "@@\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1))))
+
+    ;; TypeScript
+    ('typescript-mode
+     (setq imenu-generic-expression
+           '(("Interfaces" "^\\s-*interface\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Classes" "^\\s-*class\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Types" "^\\s-*type\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Enums" "^\\s-*enum\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Functions" "^\\s-*function\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
+             ("Arrow Functions" "^\\s-*const\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)\\s-*=\\s-*(" 1)
+             ("Variables" "^\\s-*(?:const|let|var)\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1))))))
 
 (provide 'init-efuns)

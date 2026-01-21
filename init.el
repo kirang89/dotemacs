@@ -1,30 +1,22 @@
-;; A minimial setup for Clojurians
+;;; init.el --- Emacs initialization -*- lexical-binding: t; -*-
 
-;; Reduce the frequency of garbage collection by making it happen on
-;; each 50MB of allocated data (the default is on every 0.76MB)
-(setq gc-cons-threshold 50000000
-      gc-cons-percentage 0.6)
+;;; Commentary:
+;; Bootstrap straight.el and load modular configuration.
 
-(setq frame-inhibit-implied-resize t)
+;;; Code:
 
-;; Automatically reload files when they change on disk
-(global-auto-revert-mode 1)
-(setq auto-revert-verbose nil)
+;;;; ==========================================================
+;;;;                    STRAIGHT.EL BOOTSTRAP
+;;;; ==========================================================
 
-(setq package-enable-at-startup nil)
-
-;; Add to your init.el before loading use-package
 (setq straight-built-in-pseudo-packages
-      '(emacs project eglot xref cl-lib))
+      '(emacs use-package project eglot xref cl-lib eldoc flymake repeat jsonrpc))
 
-;; Bootstrap configuration for straight.el
 (setq straight-use-package-by-default t
-      ;;      use-package-always-defer t
       straight-cache-autoloads t
       straight-vc-git-default-clone-depth 1
       vc-follow-symlinks t
-      straight-check-for-modifications '(check-on-save find-when-checking)
-      straight-recipes-emacsmirror-use-mirror nil)
+      straight-check-for-modifications '(check-on-save find-when-checking))
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -39,404 +31,195 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(straight-use-package 'use-package)
+;; use-package is built-in since Emacs 29
+(require 'use-package)
+(setq use-package-always-ensure nil)
 
-;; Move custom configuration variables set by Emacs, to a seperate temporary file
-;; (setq custom-file "~/.emacs.d/custom.el")
+;;;; ==========================================================
+;;;;                    CUSTOM FILE
+;;;; ==========================================================
+
 (setq custom-file (make-temp-file "emacs-custom-"))
 (load custom-file 'noerror)
 
-;;
-;; APPEARANCE
-;;
+;;;; ==========================================================
+;;;;                    SANE DEFAULTS
+;;;; ==========================================================
 
-;; prevent the glimpse of unstyled UI elements
-(push '(menu-bar-lines . 0) default-frame-alist)
-(push '(tool-bar-lines . 0) default-frame-alist)
-(push '(vertical-scroll-bars) default-frame-alist)
+;; Coding system
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(setq default-file-name-coding-system 'utf-8
+      buffer-file-coding-system 'utf-8)
 
-;; initial starting position
-(push '(height . 43) default-frame-alist)
-(push '(width . 130) default-frame-alist)
-(push '(left . 70) default-frame-alist)
-(push '(top . 30) default-frame-alist)
+;; Use y/n instead of yes/no
+(setq use-short-answers t)
 
-;; disable GUI elements
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-
-(setq frame-resize-pixelwise t
-      frame-inhibit-implied-resize t
-      frame-title-format '("%b")
-      ring-bell-function 'ignore
+;; General settings
+(setq ring-bell-function 'ignore
       use-dialog-box t
       use-file-dialog nil
-      use-short-answers t
       inhibit-splash-screen t
       inhibit-startup-screen t
       inhibit-startup-echo-area-message user-login-name
       inhibit-startup-buffer-menu t
-      comp-deferred-compilation nil
-      frame-resize-pixelwise t
       cursor-in-non-selected-windows nil
       site-run-file nil
       system-time-locale "en_US.utf8"
-      initial-major-mode 'markdown-mode
-      initial-scratch-message nil)
-
-;; Make the title bar blend with the background color
-;; Set the appearance to light/dark depending on your theme
-(add-to-list 'default-frame-alist
-             '(ns-transparent-titlebar . t))
-(add-to-list 'default-frame-alist
-             '(ns-appearance . dark))
-
-;; Show full file path in the title bar
-(setq
- frame-title-format
- '((:eval (if (buffer-file-name)
-              (abbreviate-file-name (buffer-file-name))
-            "%b"))))
-
-;; Line numbers
-;; Add some padding when displaying line numbers
-(setq linum-format "%5d ")
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-
-;;
-;; SANE DEFAULTS
-;;
-
-;; Make native compilation silent and prune its cache.
-;; https://www.masteringemacs.org/article/speed-up-emacs-libjansson-native-elisp-compilation
-(if (and (fboundp 'native-comp-available-p)
-         (native-comp-available-p))
-    (setq comp-deferred-compilation t
-          package-native-compile t)
-  (message "Native complation is *not* available, lsp performance will suffer..."))
-
-(unless (functionp 'json-serialize)
-  (message "Native JSON is *not* available, lsp performance will suffer..."))
-
-(setq native-comp-async-report-warnings-errors 'silent)
-(setq native-compile-prune-cache t)
-
-;; do not steal focus while doing async compilations
-(setq warning-suppress-types '((comp)))
-
-;; Use y/n instead of full yes/no for confirmation messages
-(fset 'yes-or-no-p 'y-or-n-p)
-
-;; Use spaces instead of tabs
-(setq tab-width 2)
-(setq js-indent-level 2)
-(setq css-indent-offset 2)
-(setq c-basic-offset 2)
-(setq-default indent-tabs-mode nil)
-(setq-default c-basic-offset 2)
-(setq-default tab-width 2)
-(setq-default c-basic-indent 2)
-
-;; Type over selected text
-(delete-selection-mode 1)
-
-;; Kill whole line
-(global-set-key (kbd "s-<backspace>") 'kill-whole-line)
-
-;; Use Cmd for movement
-(global-set-key (kbd "s-<right>") (kbd "C-e"))  ;; End of line
-(global-set-key (kbd "s-<left>") (kbd "C-a"))   ;; Beginning of line
-
-
-;; Kills the current buffer without displaying the annoying menu.
-;; A confirmation will be asked for, if the buffer has been modified
-(global-set-key (kbd "C-x k") 'kill-current-buffer)
-
-;; Remove trailing whitespace before saving
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+      initial-scratch-message nil
+      create-lockfiles nil
+      select-enable-clipboard t
+      save-interprogram-paste-before-kill t
+      confirm-nonexistent-file-or-buffer nil)
 
 ;; Follow compilation buffer output
 (setq compilation-scroll-output t)
 
-;; On OS X, an Emacs instance started from the graphical user
-;; interface will have a different environment than a shell in a
-;; terminal window, because OS X does not run a shell during the
-;; login. Obviously this will lead to unexpected results when
-;; calling external utilities like make from Emacs.
-;; This library works around this problem by copying important
-;; environment variables from the user's shell.
-;; https://github.com/purcell/exec-path-from-shell
-(use-package exec-path-from-shell
-  :config
-  (when (memq window-system '(mac ns x))
-    (exec-path-from-shell-initialize)))
+;; No time estimates
+(setq history-delete-duplicates t)
 
-(use-package clojure-mode)
+;; Native compilation (Emacs 28+)
+(when (native-comp-available-p)
+  (setq native-comp-deferred-compilation t
+        package-native-compile t))
+(setq native-comp-async-report-warnings-errors 'silent
+      native-compile-prune-cache t
+      warning-suppress-types '((comp)))
 
-(require 'clojure-mode)
-;; Then define your custom syntax table
-;; (defvar clojure-mode-with-hyphens-as-word-sep-syntax-table
-;;   (let ((st (make-syntax-table clojure-mode-syntax-table)))
-;;     (modify-syntax-entry 45 "w" st)
-;;     st))
+;; Check for native JSON
+(unless (functionp 'json-serialize)
+  (message "Native JSON is *not* available, LSP performance will suffer..."))
 
-;; Do not allow the cursor in the minibuffer prompt
-(setq minibuffer-prompt-properties
-      '(read-only t cursor-intangible t face minibuffer-prompt))
-(add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+;; macOS key modifiers
+(setq mac-option-key-is-meta nil
+      mac-command-key-is-meta t
+      mac-command-modifier 'super
+      mac-option-modifier 'meta)
 
-(use-package vertico
-  :custom
-  (vertico-cycle nil)
-  (read-file-name-completion-ignore-case t)
-  (read-buffer-completion-ignore-case t)
-  (completion-ignore-case t)
+;; Help window behavior
+(setq-default help-window-select t
+              truncate-lines t
+              fill-column 100
+              line-spacing 1)
 
-  :config
-  (vertico-mode))
+;; Silence the warning when killing a buffer with a live process
+(setq kill-buffer-query-functions
+      (remq 'process-kill-buffer-query-function
+            kill-buffer-query-functions))
 
-(use-package marginalia
-  :after vertico
-  :init
-  (marginalia-mode))
+;;;; ==========================================================
+;;;;                    LOAD PATH
+;;;; ==========================================================
 
-(use-package consult
-  :bind (("s-b" . consult-buffer)
-         ("M-g g" . consult-goto-line)
-         ("M-g o" . consult-outline)
-         ("M-g l" . consult-line)
-         ("M-g f" . consult-find)
-         ("s-l"   . consult-line)
-         ("C-x 4 b" . consult-buffer-other-window))
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-  :config
-  (setq consult-find-args "find . -not ( -path */.[A-Za-z]* -prune )")
-  ;; consult-ripgrep optimisations
-  (setq consult-async-refresh-delay 0.15  ; Default: 0.2
-        consult-async-input-throttle 0.2  ; Default: 0.3
-        consult-async-input-debounce 0.1)   ; Default: 0.2
+;;;; ==========================================================
+;;;;                    LOAD MODULES
+;;;; ==========================================================
 
-  )
+;; Custom functions (used by other modules)
+(load (expand-file-name "init-efuns.el" user-emacs-directory))
 
-;; Persist history over Emacs restarts. Vertico sorts by history position.
-(use-package savehist
-  :init
-  (savehist-mode))
+;; Core infrastructure
+(require 'config-tools)
 
-(use-package nerd-icons-corfu)
+;; UI and appearance
+(require 'config-ui)
 
-(use-package corfu
-  :straight (corfu :repo "minad/corfu" :branch "main" :files (:defaults "extensions/*.el"))
-  :demand t
-  :config
-  (defun corfu-complete-and-quit ()
-    (interactive)
-    (corfu-complete)
-    (corfu-quit))
-  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
-  (global-corfu-mode 1)
-  (corfu-popupinfo-mode +1)
-  :bind  (:map corfu-map
-               ("TAB" . corfu-next)
-               ([tab] . corfu-next)
-               ("RET" . corfu-complete-and-quit)
-               ("<return>" . corfu-complete-and-quit)
-               ([remap completion-at-point] . corfu-complete))
-  :custom
-  (corfu-auto t)
-  (corfu-cycle nil)
-  (corfu-count 9)
-  (corfu-on-exact-match 'quit)
-  (corfu-preselect-first t)
-  (corfu-quit-at-boundary 'separator)
-  (corfu-auto-delay 0.0)
-  (corfu-auto-prefix 2)
-  (corfu-quit-no-match t)
-  (corfu-scroll-margin 5))
+;; Completion framework
+(require 'config-completion)
 
-(use-package cape
-  :demand t
-  :init
-  (add-to-list 'completion-at-point-functions #'cape-file))
+;; Search and navigation
+(require 'config-search)
 
-;; Install and setup company-mode for autocompletion
-;; (use-package company
-;;   :bind (("C-p" . company-select-previous)
-;;          ("C-n" . company-select-next))
-;;   :init
-;;   (add-hook 'prog-mode-hook 'company-mode)
-;;   :config
-;;   (global-company-mode)
-;;   (setq company-tooltip-limit 10)
-;;   (setq company-idle-delay 0.2)
-;;   (setq company-echo-delay 0)
-;;   (setq company-minimum-prefix-length 2)
-;;   (setq company-require-match nil)
-;;   (setq company-selection-wrap-around t)
-;;   (setq company-tooltip-align-annotations t)
-;;   (setq company-tooltip-flip-when-above nil)
-;;   (setq company-dabbrev-ignore-case nil
-;;         company-dabbrev-downcase nil)
-;;   ;; weight by frequency
-;;   (setq company-transformers '(company-sort-by-occurrence)))
+;; File and project management
+(require 'config-files)
 
-;; Better syntax highlighting
-;;(use-package clojure-mode-extra-font-locking)
+;; Editing enhancements
+(require 'config-editing)
 
-;; Highlight matching parentheses
-(require 'paren)
-(show-paren-mode 1)
-(setq show-paren-delay 0.125)
-(set-face-background 'show-paren-match (face-background 'default))
-(if (eq (frame-parameter nil 'background-mode) 'dark)
-    (set-face-foreground 'show-paren-match "red")
-  (set-face-foreground 'show-paren-match "black"))
-(set-face-attribute 'show-paren-match nil :weight 'extra-bold)
+;; Version control
+(require 'config-vcs)
 
+;; LSP and code intelligence
+(require 'config-lsp)
 
-;; Add ability to shift between buffers using shift+arrow keys.
-(when (fboundp 'windmove-default-keybindings)
-  (windmove-default-keybindings))
+;; Programming languages
+(require 'config-languages)
 
+;; AI assistants
+(require 'config-ai)
 
-;; Paredit makes it easier to navigate/edit s-expressions as blocks.
-(use-package paredit
-  :config
-  (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
-  (add-hook 'clojure-mode-hook
-            (lambda ()
-              (paredit-mode)
-              (local-set-key (kbd "<C-s-right>") #'paredit-forward-slurp-sexp)
-              (local-set-key (kbd "<C-s-left>") #'paredit-forward-barf-sexp))))
+;;;; ==========================================================
+;;;;                    GLOBAL KEYBINDINGS
+;;;; ==========================================================
 
+;; Movement and editing
+(global-set-key (kbd "s-<backspace>") 'kill-whole-line)
+(global-set-key (kbd "s-<right>") (kbd "C-e"))
+(global-set-key (kbd "s-<left>") (kbd "C-a"))
+(global-set-key (kbd "C-x k") 'kill-current-buffer)
+(global-set-key (kbd "M-j") (lambda () (interactive) (join-line -1)))
+(global-set-key (kbd "s-x") 'execute-extended-command)
+(global-set-key (kbd "C-g") #'kg/keyboard-quit-dwim)
 
-;; To add some colors to those boring parens
-(use-package rainbow-delimiters
-  :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+;; Window management
+(global-set-key (kbd "C-x 3") 'kg/split-right-and-move)
+(global-set-key (kbd "C-x 2") 'kg/split-below-and-move)
+(global-set-key (kbd "s-{") 'previous-buffer)
+(global-set-key (kbd "s-}") 'next-buffer)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+(global-set-key (kbd "<s-S-return>") 'kg/toggle-maximize-buffer)
 
-(use-package clojure-mode
-  :straight (:type built-in)
-  :config
+;; Custom functions
+(global-set-key (kbd "C-a") 'kg/beginning-of-line-dwim)
+(global-set-key [(meta shift down)] 'kg/duplicate-start-of-line-or-region)
+(global-set-key (kbd "<f6>") 'kg/show-user-config)
 
-  ;;Treat hyphens as a word character when transposing words
-  (defvar clojure-mode-with-hyphens-as-word-sep-syntax-table
-    (let ((st (make-syntax-table clojure-mode-syntax-table)))
-      (modify-syntax-entry ?- "w" st)
-      st))
+;; Search and navigation
+(global-set-key (kbd "s-l") 'consult-goto-line)
+(global-set-key (kbd "s-f") 'isearch-forward)
+(global-set-key (kbd "s-r") 'query-replace-regexp)
+(global-set-key (kbd "s-w") 'kill-current-buffer)
 
-  (defun transpose-words-with-hyphens (arg)
-    "Treat hyphens as a word character when transposing words"
-    (interactive "*p")
-    (with-syntax-table clojure-mode-with-hyphens-as-word-sep-syntax-table
-      (transpose-words arg)))
+;; Copy line if no region
+(advice-add 'ns-copy-including-secondary :around #'kg/copy-line-if-no-region)
 
-  (define-key clojure-mode-map (kbd "M-t") 'transpose-words-with-hyphens))
+;; Elisp eval
+(add-hook 'emacs-lisp-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c C-c") #'kg/eval-root-expression)))
 
-(define-clojure-indent
- (defrecord 1)
- (as-> 2))
+;;;; ==========================================================
+;;;;                    DISABLED COMMANDS
+;;;; ==========================================================
 
-;; Cider integrates a Clojure buffer with a REPL
-(use-package cider
-  :init
-  ;; (add-to-list 'auto-mode-alist '("\\.clj\\'" . go-mode))
-  (setq cider-repl-pop-to-buffer-on-connect t
-        cider-show-error-buffer t
-        cider-auto-select-error-buffer t
-        cider-repl-history-file "~/.emacs.d/cider-history"
-        cider-repl-wrap-history t
-        cider-repl-history-size 100
-        cider-repl-use-clojure-font-lock t
-        cider-docview-fill-column 70
-        cider-stacktrace-fill-column 76
-        nrepl-popup-stacktraces nil
-        nrepl-log-messages nil
-        nrepl-hide-special-buffers t
-        cider-repl-use-pretty-printing t
-        cider-repl-result-prefix ";; => "
-        cider-repl-display-help-banner nil
-        cider-font-lock-dynamically '(macro core function var))
-
-  :config
-  (add-hook 'clojure-mode-hook #'cider-mode)
-  (add-hook 'cider-mode-hook #'eldoc-mode)
-  (add-hook 'cider-repl-mode-hook #'paredit-mode)
-  (add-hook 'cider-repl-mode-hook #'company-mode)
-  (add-hook 'cider-repl-mode-hook
-            (lambda ()
-              (local-set-key (kbd "C-l") 'cider-repl-clear-buffer)))
-  (add-hook 'cider-mode-hook #'company-mode)
-  (add-hook 'cider-mode-hook
-            (lambda ()
-              (local-set-key (kbd "M-.") 'xref-find-definitions)
-              (local-set-key (kbd "<C-return>") 'cider-eval-last-sexp)
-              (local-set-key (kbd "C-c C-n") 'cider-eval-buffer)
-              (local-set-key (kbd "C-x C-i") 'cider-inspect-last-sexp))))
-
-
-;; Adds some niceties/refactoring support
-(use-package clj-refactor
-  :config
-  (setq cljr-warn-on-eval nil)
-  (add-hook 'clojure-mode-hook
-            (lambda ()
-              (clj-refactor-mode 1))))
-
-(use-package flycheck-clj-kondo
-  :config
-  (remove-hook 'clojure-mode-hook
-               (lambda ()
-                 (require 'flycheck-clj-kondo))))
-
-;; Aggressively indents your clojure code
-(use-package aggressive-indent
-  :commands (aggressive-indent-mode)
-  :config
-  (add-hook 'clojure-mode-hook 'aggressive-indent-mode))
-
-;; Operate (list, search, replace....) on files at a project level.
-(use-package projectile
-  :bind (:map projectile-mode-map
-              ("s-p" . projectile-command-map))
-  :init
-  (setq-default projectile-cache-file
-                (expand-file-name ".projectile-cache" user-emacs-directory))
-  (add-hook 'prog-mode-hook #'projectile-mode)
-  :config
-  (projectile-mode)
-  ;; (setq projectile-completion-system 'ivy)
-  (setq-default projectile-enable-caching t
-                projectile-mode-line-prefix ""
-                projectile-sort-order 'recentf
-                ;; Show project (if any) name in modeline
-                projectile-mode-line '(:eval (projectile-project-name))))
-
-;; Magit: The only git interface you'll ever need
-(use-package magit
-  :bind ("C-x g" . 'magit-status)
-  :config
-  (setq magit-set-upstream-on-push 'askifnotset
-        magit-push-always-verify nil
-        magit-revert-buffers 'silent
-        magit-diff-highlight-indentation nil
-        magit-diff-paint-whitespace nil
-        magit-diff-highlight-trailing nil))
-
-;; User customizations
-;; Add your customizations to `init-user.el`
-(when (file-exists-p "~/.emacs.d/init-user.el")
-  (setq user-custom-file "~/.emacs.d/init-user.el")
-  (load user-custom-file)
-  (put 'downcase-region 'disabled nil))
 (put 'narrow-to-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+
+;; Disable these commands
+(mapc
+ (lambda (command)
+   (put command 'disabled t))
+ '(eshell project-eshell overwrite-mode iconify-frame diary))
+
+;;;; ==========================================================
+;;;;                    SERVER
+;;;; ==========================================================
 
 (require 'server)
 (unless (server-running-p)
   (server-start))
 
-;; Reset GC to reasonable defaults
+;;;; ==========================================================
+;;;;                    CLEANUP
+;;;; ==========================================================
+
+;; Reset GC after startup
 (add-hook 'emacs-startup-hook
           (lambda ()
             (setq gc-cons-threshold 16777216
                   gc-cons-percentage 0.1)))
+
+(provide 'init)
+;;; init.el ends here
