@@ -67,7 +67,9 @@
   :ensure t
   :custom
   (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+  (completion-category-overrides '((file (styles basic partial-completion))
+                                   (eglot (styles orderless))
+                                   (eglot-capf (styles orderless)))))
 
 ;;;; Corfu (in-buffer completion)
 (use-package nerd-icons-corfu
