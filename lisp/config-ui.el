@@ -122,6 +122,9 @@
 (when (display-graphic-p)
   (context-menu-mode 1))
 
+;; Recover accidentally closed frames with C-x 5 u (Emacs 29+)
+(undelete-frame-mode 1)
+
 ;;;; Miscellaneous UI Settings
 (setq ns-use-proxy-icon nil)
 (setq ns-pop-up-frames nil)

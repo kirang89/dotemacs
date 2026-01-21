@@ -63,6 +63,27 @@
                 projectile-sort-order 'recentf
                 projectile-mode-line '(:eval (projectile-project-name))))
 
+;;;; Find Sibling File (Emacs 29+)
+;; Navigate between related files (implementation ↔ test)
+(setq find-sibling-rules
+      '(;; Python: foo.py <-> test_foo.py, tests/test_foo.py
+        ("\\([^/]+\\)\\.py\\'" "\\1_test.py" "test_\\1.py" "tests/test_\\1.py")
+        ("test_\\([^/]+\\)\\.py\\'" "\\1.py" "../\\1.py" "src/\\1.py")
+        ("\\([^/]+\\)_test\\.py\\'" "\\1.py" "../\\1.py" "src/\\1.py")
+
+        ;; Clojure: foo.clj <-> foo_test.clj, test/foo_test.clj
+        ("src/\\(.+\\)\\.clj\\'" "test/\\1_test.clj")
+        ("test/\\(.+\\)_test\\.clj\\'" "src/\\1.clj")
+        ("\\([^/]+\\)\\.clj\\'" "\\1_test.clj")
+        ("\\([^/]+\\)_test\\.clj\\'" "\\1.clj")
+
+        ;; OCaml: foo.ml <-> foo.mli, foo_test.ml
+        ("\\([^/]+\\)\\.ml\\'" "\\1.mli" "\\1_test.ml" "test/\\1_test.ml")
+        ("\\([^/]+\\)\\.mli\\'" "\\1.ml")
+        ("\\([^/]+\\)_test\\.ml\\'" "\\1.ml" "../\\1.ml")))
+
+(global-set-key (kbd "C-c s") 'find-sibling-file)
+
 ;;;; Find File in Project
 (use-package find-file-in-project
   :config

@@ -87,5 +87,13 @@
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
 
+;;;; Visual Wrap (Emacs 30+)
+;; Display wrapped lines with proper indentation
+(use-package visual-wrap
+  :ensure nil
+  :straight nil
+  :hook ((text-mode . visual-wrap-prefix-mode)
+         (prog-mode . visual-wrap-prefix-mode)))
+
 (provide 'config-editing)
 ;;; config-editing.el ends here

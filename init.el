@@ -86,6 +86,11 @@
       native-compile-prune-cache t
       warning-suppress-types '((comp)))
 
+;; Long line performance (Emacs 29+)
+(setq long-line-threshold 10000
+      large-hscroll-threshold 10000
+      syntax-wholeline-max 10000)
+
 ;; Check for native JSON
 (unless (functionp 'json-serialize)
   (message "Native JSON is *not* available, LSP performance will suffer..."))
@@ -175,6 +180,9 @@
 (global-set-key (kbd "C-a") 'kg/beginning-of-line-dwim)
 (global-set-key [(meta shift down)] 'kg/duplicate-start-of-line-or-region)
 (global-set-key (kbd "<f6>") 'kg/show-user-config)
+
+;; Duplicate line or region (Emacs 29+)
+(global-set-key (kbd "C-c d") 'duplicate-dwim)
 
 ;; Search and navigation
 (global-set-key (kbd "s-l") 'consult-goto-line)
