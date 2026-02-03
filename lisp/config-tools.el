@@ -34,6 +34,8 @@
   (with-eval-after-load 'flycheck
     ;; Specifically handle free variable warnings with byte-compiler options
     (setq-default flycheck-emacs-lisp-load-path 'inherit)
+    ;; Prevent flycheck from trying to initialize packages (fixes "--" file error)
+    (setq-default flycheck-emacs-lisp-initialize-packages nil)
     (setq-default flycheck-emacs-lisp-check-form
                   "(progn (setq byte-compile-warnings '(not free-vars unresolved)) (batch-byte-compile))"))
 
