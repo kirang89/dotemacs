@@ -7,8 +7,7 @@
 
 ;;;; Project
 (use-package project
-  :ensure nil
-  :straight nil)
+  :ensure nil)
 
 ;;;; Xref
 (use-package xref
@@ -42,7 +41,6 @@
    (go-mode . eglot-ensure)
    (go-ts-mode . eglot-ensure))
   :ensure nil
-  :straight nil
   :config
   ;; Use pyright for Python (provides completions, unlike ruff)
   (add-to-list 'eglot-server-programs
