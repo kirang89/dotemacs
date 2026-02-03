@@ -138,6 +138,9 @@
 ;; Core infrastructure
 (require 'config-tools)
 
+;; Evil mode (vim emulation) - must load early for evil-collection
+;;(require 'config-evil)
+
 ;; UI and appearance
 (require 'config-ui)
 
@@ -159,15 +162,35 @@
 ;; LSP and code intelligence
 (require 'config-lsp)
 
+;; Symbol outline sidebar
+(require 'config-outline)
+
 ;; Programming languages
 (require 'config-languages)
 
 ;; AI assistants
 (require 'config-ai)
 
+;; Vim surround text objects
+(use-package surround
+  :straight (surround :type git :host github :repo "kirang89/surround.el")
+  :bind-keymap ("C-c i" . surround-map)
+  :bind (:map surround-map
+              ("\"" . (lambda ()
+                          (interactive)
+                          (surround-change-inside ?\")))
+              ("[" . (lambda ()
+                       (interactive)
+                       (surround-change-inside ?\[)))
+              ("{" . (lambda ()
+                       (interactive)
+                       (surround-change-inside ?\{)))))
+
 ;;;; ==========================================================
 ;;;;                    GLOBAL KEYBINDINGS
 ;;;; ==========================================================
+;; These bindings are overridden by config-evil.el when evil is loaded.
+;; Keep them here as fallbacks for non-evil usage.
 
 ;; Movement and editing
 (global-set-key (kbd "s-<backspace>") 'kill-whole-line)
@@ -189,7 +212,7 @@
 ;; Custom functions
 (global-set-key (kbd "C-a") 'kg/beginning-of-line-dwim)
 (global-set-key [(meta shift down)] 'kg/duplicate-start-of-line-or-region)
-(global-set-key (kbd "<f6>") 'kg/show-user-config)
+(global-set-key (kbd "<f6>") (lambda () (interactive) (find-file user-init-file)))
 
 ;; Duplicate line or region (Emacs 29+)
 (global-set-key (kbd "C-c d") 'duplicate-dwim)

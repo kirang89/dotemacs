@@ -6,15 +6,17 @@
 ;;; Code:
 
 ;;;; Font Configuration
-(defconst kg/mono-font "Google Sans Code")
+(defconst kg/mono-font "Ioskeley Mono")
 (defconst kg/org-code-font "JetBrains Mono")
 (defconst kg/variable-pitch-font "SF Pro")
 
 (set-face-attribute 'default nil
                     :family kg/mono-font
-                    :height 160
+                    :height 150
                     :weight 'normal
                     :width 'normal)
+
+(setq-default line-spacing 2)
 
 ;;;; GUI Elements
 (menu-bar-mode -1)
@@ -103,11 +105,11 @@
   ;; Don't compact font caches during GC.
   (setq inhibit-compacting-font-caches t)
   (setq doom-modeline-buffer-file-name-style 'relative-from-project
-        doom-modeline-icon (display-graphic-p)
-        doom-modeline-major-mode-color-icon t
-        doom-modeline-major-mode-icon t
-        doom-modeline-buffer-state-icon t
-        doom-modeline-buffer-modification-icon t
+        doom-modeline-icon nil
+        doom-modeline-major-mode-color-icon nil
+        doom-modeline-major-mode-icon nil
+        doom-modeline-buffer-state-icon nil
+        doom-modeline-buffer-modification-icon nil
         doom-modeline-minor-modes nil
         doom-modeline-github nil
         doom-modeline-version nil
@@ -115,9 +117,12 @@
         doom-modeline-bar-width 0
         doom-modeline-buffer-encoding nil
         doom-modeline-vcs-max-length 50
+        doom-modeline-vcs-icon nil
         doom-modeline-gnus nil
         doom-modeline-irc nil
-        doom-modeline-persp-name nil
+        doom-modeline-persp-name t
+        doom-modeline-display-default-persp-name t
+        doom-modeline-persp-icon nil
         doom-modeline-window-width-limit fill-column
         doom-modeline-lsp nil               ; Disabled for performance - updates on every LSP message
         doom-modeline-env-version nil))

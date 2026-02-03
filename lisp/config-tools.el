@@ -72,8 +72,9 @@
 
 (use-package ace-window
   :straight t
-  :bind
-  ("M-o" . ace-window))
+  :bind (("M-o" . ace-window))
+  :custom-face
+  (aw-leading-char-face ((t (:foreground "red" :height 3.0)))))
 
 (use-package envrc
   :hook (after-init . envrc-global-mode))

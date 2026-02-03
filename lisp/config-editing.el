@@ -88,11 +88,38 @@
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
 
+;;;; Pulse on Yank (Neovim-style highlight on copy)
+(require 'pulse)
+
+(defcustom kg/pulse-on-yank-duration 0.02
+  "Duration of the pulse effect in seconds."
+  :type 'number
+  :group 'convenience)
+
+(defface kg/pulse-on-yank-face
+  '((t :inherit region))
+  "Face used for pulsing yanked region.
+Dynamically updated to match region face with increased intensity."
+  :group 'convenience)
+
+(set-face-attribute 'kg/pulse-on-yank-face nil :background "#ffffff")
+
+(defun kg/pulse-on-yank-advice (orig-fun beg end &rest args)
+  "Pulse the region that was just killed/copied.
+Advice around `kill-ring-save' and `kill-region'."
+  (let ((pulse-iterations 1)
+        (pulse-delay kg/pulse-on-yank-duration))
+    (pulse-momentary-highlight-region beg end 'kg/pulse-on-yank-face))
+  (apply orig-fun beg end args))
+
+(advice-add 'kill-ring-save :around #'kg/pulse-on-yank-advice)
+(advice-add 'kill-region :around #'kg/pulse-on-yank-advice)
+
 ;;;; Visual Wrap (Emacs 30+)
 ;; Display wrapped lines with proper indentation
 (use-package visual-wrap
   :ensure nil
-  :straight nil
+  :straight (:type built-in)
   :hook ((text-mode . visual-wrap-prefix-mode)
          (prog-mode . visual-wrap-prefix-mode)))
 

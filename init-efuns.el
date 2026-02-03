@@ -86,10 +86,6 @@
         (consult-ripgrep nil regionp))
     (consult-ripgrep)))
 
-(defun kg/show-user-config ()
-  (interactive)
-  (find-file "~/.emacs.d/init-user.el"))
-
 (defun kg/toggle-maximize-buffer ()
   "Maximize buffer"
   (interactive)
@@ -317,5 +313,17 @@
              ("Functions" "^\\s-*function\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1)
              ("Arrow Functions" "^\\s-*const\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)\\s-*=\\s-*(" 1)
              ("Variables" "^\\s-*(?:const|let|var)\\s-+\\([a-zA-Z_][a-zA-Z0-9_]*\\)" 1))))))
+
+(defun kg/git-pull-rebase-autostash ()
+  "Run git pull --rebase --autostash."
+  (interactive)
+  (magit-run-git-async "pull" "--rebase" "--autostash"))
+
+(defun kg/open-terminal-in-new-frame ()
+  "Open vterm in a new frame."
+  (interactive)
+  (let ((frame (make-frame)))
+    (select-frame frame)
+    (vterm)))
 
 (provide 'init-efuns)

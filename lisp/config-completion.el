@@ -18,8 +18,14 @@
   (read-file-name-completion-ignore-case t)
   (read-buffer-completion-ignore-case t)
   (completion-ignore-case t)
+  (vertico-multiform-commands
+   '((kg/consult-ripgrep-with-region buffer)
+     (projectile-ripgrep buffer)))
+  (vertico-buffer-display-action
+   '(display-buffer-in-side-window (side . right) (window-width . 0.4)))
   :config
-  (vertico-mode))
+  (vertico-mode)
+  (vertico-multiform-mode))
 
 ;;;; Marginalia
 (use-package marginalia
@@ -30,11 +36,11 @@
 ;;;; Consult
 (use-package consult
   :bind (("s-b" . consult-buffer)
-         ("s-g" . #'kg/consult-ripgrep-with-region)
+         ("s-g" . kg/consult-ripgrep-with-region)
+         ("s-l" . kg/consult-line-with-region)
          ("M-g f" . #'kg/fast-grep)
          ("M-g g" . #'kg/fast-grep-symbol)
          ("M-g o" . consult-outline)
-         ("s-l"   . consult-line)
          ("C-x 4 b" . consult-buffer-other-window))
 
   :config
@@ -46,9 +52,12 @@
         consult-async-input-debounce 0.3
         consult-async-min-input 3)
   (setq consult-buffer-sources
-        '(consult-source-hidden-buffer
-          consult-source-modified-buffer
-          consult-source-buffer)
+        '(consult-source-project-buffer        ; Project buffers
+          consult-source-modified-buffer       ; Modified buffers
+          consult-source-buffer                ; Open buffers
+          consult-source-hidden-buffer         ; Hidden buffers
+          consult-source-recent-file           ; Recent files
+          consult-source-bookmark)             ; Bookmarks
         consult-project-buffer-sources
         '(consult-source-project-buffer-hidden
           consult-source-project-buffer))
@@ -72,8 +81,8 @@
                                    (eglot-capf (styles orderless)))))
 
 ;;;; Corfu (in-buffer completion)
-(use-package nerd-icons-corfu
-  :after corfu)
+;; (use-package nerd-icons-corfu
+;;   :after corfu)
 
 (use-package corfu
   :defer 0.1
@@ -89,7 +98,7 @@
     (interactive)
     (corfu-complete)
     (corfu-quit))
-  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+  ;; (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
   (global-corfu-mode 1)
   (corfu-popupinfo-mode 1)
   ;; Set font faces (inherit colors from theme)

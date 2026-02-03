@@ -10,8 +10,7 @@
 
 ;;;; Magit
 (use-package magit
-  :defer t
-  :bind ("C-x g" . 'magit-status)
+  :bind (("C-x g" . magit-status))
   :config
   (setq magit-commit-show-diff nil
         magit-save-repository-buffers 'dontask

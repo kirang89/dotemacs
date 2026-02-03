@@ -40,7 +40,13 @@
 (use-package embark
   :ensure t
   :bind
-  (("C-." . embark-act)))
+  (("C-." . embark-act))
+  :config
+  (add-to-list 'display-buffer-alist
+               '("\\*Embark Actions\\*"
+                 (display-buffer-in-side-window)
+                 (side . right)
+                 (window-width . 0.4))))
 
 (use-package embark-consult
   :after embark
@@ -50,8 +56,7 @@
 
 ;;;; Avy
 (use-package avy
-  :config
-  (global-set-key (kbd "s-h") 'avy-goto-char-timer))
+  :bind (("s-h" . avy-goto-char-timer)))
 
 ;;;; Color Moccur
 (use-package color-moccur
@@ -66,8 +71,7 @@
 ;;;; Imenu
 (use-package imenu
   :ensure nil
-  :bind
-  ("s-i" . consult-imenu)
+  :bind (("s-i" . consult-imenu))
   :config
   (setq imenu-max-item-length 'unlimited))
 

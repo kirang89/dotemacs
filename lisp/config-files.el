@@ -51,7 +51,6 @@
 
 ;;;; Projectile
 (use-package projectile
-  :defer t
   :bind (("s-p" . projectile-command-map))
   :hook (prog-mode . projectile-mode)
   :init
@@ -59,7 +58,7 @@
                 (expand-file-name ".projectile-cache" user-emacs-directory))
   :config
   (setq projectile-indexing-method 'alien         ; Use git/fd - fastest
-        projectile-enable-caching 'persistent     ; Survives restarts
+        projectile-enable-caching t               ; Session only (clears on restart)
         projectile-git-submodule-command nil      ; Skip slow submodule scanning
         projectile-mode-line-prefix ""
         projectile-sort-order 'recentf
@@ -89,13 +88,12 @@
 ;;;; Find File in Project
 ;; Add custom directories to ffip-prune-patterns to exclude from search
 (use-package find-file-in-project
-  :commands (find-file-in-project find-file-in-project-by-selected)
   :bind (("s-t" . find-file-in-project))
+  :commands (find-file-in-project find-file-in-project-by-selected)
   :config
   (setq ffip-use-rust-fd t
         ffip-prune-patterns '("*/.git" "*/node_modules" "*/target" "*/build"
                               "*/dist" "*/.svn" "*/coverage" "*/__pycache__")
-        ffip-find-options "-not -size +64k"
         ffip-limit 2000))
 
 (provide 'config-files)
