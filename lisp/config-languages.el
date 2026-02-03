@@ -245,12 +245,34 @@
 (when (treesit-available-p)
   (setq treesit-font-lock-level 3              ; Level 3 for performance
         treesit-max-buffer-size (* 1024 1024)) ; 1MB max for tree-sitter
+
+  ;; Static tree-sitter mode remapping instead of global-treesit-auto-mode.
+  ;; treesit-auto's dynamic grammar checking adds ~560ms to EVERY file open.
+  ;; This static approach is instant. Add new modes here after installing grammars.
+  (setq major-mode-remap-alist
+        '((python-mode . python-ts-mode)
+          (javascript-mode . js-ts-mode)
+          (js-mode . js-ts-mode)
+          (typescript-mode . typescript-ts-mode)
+          (json-mode . json-ts-mode)
+          (css-mode . css-ts-mode)
+          (yaml-mode . yaml-ts-mode)
+          (bash-mode . bash-ts-mode)
+          (sh-mode . bash-ts-mode)
+          (c-mode . c-ts-mode)
+          (c++-mode . c++-ts-mode)
+          (ruby-mode . ruby-ts-mode)
+          (go-mode . go-ts-mode)
+          (rust-mode . rust-ts-mode)))
+
+  ;; Optional: Use treesit-auto only for installing grammars, not remapping
   (use-package treesit-auto
     :ensure t
     :config
     (setq treesit-auto-install 'prompt)
-    (treesit-auto-add-to-auto-mode-alist 'all)
-    (global-treesit-auto-mode 1)))
+    ;; Don't enable global-treesit-auto-mode - it's slow!
+    ;; Use it manually via M-x treesit-auto-install-all
+    ))
 
 (provide 'config-languages)
 ;;; config-languages.el ends here
