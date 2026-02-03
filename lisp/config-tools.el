@@ -18,7 +18,6 @@
 ;; which-key is built-in since Emacs 30
 (use-package which-key
   :ensure nil
-  :straight nil
   :defer 1
   :config
   (which-key-mode))
@@ -152,7 +151,6 @@
 ;; editorconfig is built-in since Emacs 30
 (use-package editorconfig
   :ensure nil
-  :straight nil
   :config
   (editorconfig-mode 1))
 (use-package jsonrpc)
