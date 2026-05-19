@@ -16,7 +16,7 @@
                     :weight 'normal
                     :width 'normal)
 
-(setq-default line-spacing 2)
+(setq-default line-spacing 0)
 
 ;;;; GUI Elements
 (menu-bar-mode -1)
@@ -61,7 +61,9 @@
 (global-so-long-mode 1)
 
 ;;;; hl-line (buffer-local for performance)
-(add-hook 'prog-mode-hook #'hl-line-mode)
+;; Disabled because repainting the current line on every cursor move made keyboard
+;; navigation feel jittery on macOS.
+;; (add-hook 'prog-mode-hook #'hl-line-mode)
 (with-eval-after-load 'hl-line
   (set-face-background 'hl-line "#2a2a3e")
   (set-face-attribute 'hl-line nil :underline nil))
