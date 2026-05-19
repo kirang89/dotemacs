@@ -20,7 +20,11 @@
   :ensure nil
   :defer 1
   :config
-  (which-key-mode))
+  (which-key-mode)
+  (setq which-key-sort-order #'which-key-key-order-alpha
+        which-key-side-window-max-width 0.33
+        which-key-idle-delay 0.4
+        which-key-add-column-padding 1))
 
 (use-package flycheck
   :init (add-hook 'prog-mode-hook #'flycheck-mode)

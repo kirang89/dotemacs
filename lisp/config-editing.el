@@ -23,8 +23,8 @@
 ;;;; Paren Matching
 (require 'paren)
 (show-paren-mode 1)
-(setq show-paren-delay 0.5                         ; Increased from 0.3 for performance
-      show-paren-when-point-inside-paren nil)
+(setq show-paren-delay 0.05                        ; Imperceptible, matches jit-lock-defer-time
+      show-paren-when-point-inside-paren t)
 (set-face-background 'show-paren-match (face-background 'default))
 (if (eq (frame-parameter nil 'background-mode) 'dark)
     (set-face-foreground 'show-paren-match "purple")

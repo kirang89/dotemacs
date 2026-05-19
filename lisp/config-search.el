@@ -58,6 +58,12 @@
 (use-package avy
   :bind (("s-h" . avy-goto-char-timer)))
 
+;;;; Isearch Enhancements
+(setq isearch-lazy-count t
+      lazy-count-prefix-format "(%s/%s) "
+      lazy-count-suffix-format nil
+      isearch-allow-scroll t)
+
 ;;;; Color Moccur
 (use-package color-moccur
   :commands (isearch-moccur isearch-all isearch-moccur-all)

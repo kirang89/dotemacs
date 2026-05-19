@@ -23,6 +23,11 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 
+;; Visual cursor and boundary indicators
+(setq x-stretch-cursor t
+      indicate-buffer-boundaries 'left
+      scroll-error-top-bottom t)
+
 ;;;; Frame Settings
 (setq frame-title-format
       '((:eval (if (buffer-file-name)
@@ -33,6 +38,11 @@
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
 
+;;;; Buffer Name Disambiguation
+(setq uniquify-buffer-name-style 'forward
+      uniquify-separator "/"
+      uniquify-after-kill-buffer-p t)
+
 ;; Conservative scrolling (faster than pixel-scroll-precision-mode)
 (setq scroll-conservatively 101
       scroll-margin 3
@@ -41,6 +51,14 @@
 ;; Line numbers
 (setq linum-format "%5d ")
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
+;; Breadcrumb navigation (function/class path in header-line)
+(use-package breadcrumb
+  :straight (:type git :host github :repo "joaotavora/breadcrumb")
+  :hook (prog-mode . breadcrumb-mode))
+
+;; Auto-disable expensive modes in files with very long lines
+(global-so-long-mode 1)
 
 ;;;; hl-line (buffer-local for performance)
 (add-hook 'prog-mode-hook #'hl-line-mode)
@@ -137,6 +155,11 @@
 ;;;; Miscellaneous UI Settings
 (setq ns-use-proxy-icon nil)
 (setq ns-pop-up-frames nil)
+
+;; Persist recently opened files (used by consult-buffer)
+(setq recentf-max-saved-items 100
+      recentf-auto-cleanup 'never)
+(recentf-mode 1)
 
 (provide 'config-ui)
 ;;; config-ui.el ends here

@@ -31,7 +31,10 @@
 (use-package marginalia
   :after vertico
   :init
-  (marginalia-mode))
+  (marginalia-mode)
+  :config
+  (setq marginalia-align 'right
+        marginalia-align-offset -4))
 
 ;;;; Consult
 (use-package consult
@@ -51,6 +54,10 @@
         consult-async-input-throttle 0.4
         consult-async-input-debounce 0.3
         consult-async-min-input 3)
+  (setq consult-preview-key 'any
+        consult-preview-partial-size (* 1024 1024)
+        consult-fontify-max-size (* 1024 1024))
+  (consult-customize consult-ripgrep :preview-key "M-.")
   (setq consult-buffer-sources
         '(consult-source-project-buffer        ; Project buffers
           consult-source-modified-buffer       ; Modified buffers
@@ -104,6 +111,10 @@
   ;; Set font faces (inherit colors from theme)
   (set-face-attribute 'corfu-default nil :family kg/mono-font)
   (set-face-attribute 'corfu-current nil :family kg/mono-font :inherit 'highlight)
+  ;; Persist completion history across sessions
+  (require 'corfu-history)
+  (corfu-history-mode 1)
+  (add-to-list 'savehist-additional-variables 'corfu-history)
   :custom
   (corfu-auto t)
   (corfu-cycle nil)
